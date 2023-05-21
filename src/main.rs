@@ -2,7 +2,9 @@ mod rpc;
 
 use clap::{arg, Command};
 
-use crate::rpc::*;
+// TODO:
+// add logic to send transactions from blocks
+// add logic to set local evm to mine blocks, and force mine when done with a block
 
 #[allow(unused_variables)]
 #[tokio::main]

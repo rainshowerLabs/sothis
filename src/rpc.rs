@@ -50,4 +50,3 @@ pub async fn get_block_number(historical_rpc: String) -> Result<String, Box<dyn 
 pub async fn get_block_by_number(historical_rpc: String, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
     post(historical_rpc, "eth_getBlockByNumber".to_string(), format!("\"{}\", true", block_number)).await
 }
-
