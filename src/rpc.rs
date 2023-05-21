@@ -45,3 +45,9 @@ pub async fn post(url: String, method: String, param: String) -> Result<String, 
 pub async fn get_block_number(historical_rpc: String) -> Result<String, Box<dyn std::error::Error>> {
     post(historical_rpc, "eth_blockNumber".to_string(), "".to_string()).await
 }
+
+// Get block by number
+pub async fn get_block_by_number(historical_rpc: String, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
+    post(historical_rpc, "eth_getBlockByNumber".to_string(), format!("\"{}\", true", block_number)).await
+}
+
