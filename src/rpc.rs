@@ -18,27 +18,30 @@ struct JsonRpcResponse {
     id: u32,
 }
 
-pub async fn post(url: String, method: String, param: String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn post(url: String, method: String, param: String) -> Result<String, Box<dyn std::error::Error>> {
     let client = Client::new();
-    // box leak this bih
-    //let method = Box::leak(method.into_boxed_str());
 
     let request = JsonRpcRequest {
         jsonrpc: "2.0".to_string(),
-        method: method,
+        method,
         params: json!(param),
         id: 1,
     };
     
     let response = client
-        .post(url)
+        .post(&url)
         .json(&request)
         .send()
         .await?
         .json::<JsonRpcResponse>()
         .await?;
     
-    println!("{:?}", response.result);
+    let block_number_hex = response.result;
     
-    Ok(())
+    Ok(block_number_hex.to_string())
+}
+
+// Gets blocknumber
+pub async fn get_block_number(historical_rpc: String) -> Result<String, Box<dyn std::error::Error>> {
+    post(historical_rpc, "eth_blockNumber".to_string(), "".to_string()).await
 }
