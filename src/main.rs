@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
         .version("0.1.0")
         .author("makemake <vukasin@gostovic.me>")
-        .about("Tool for replaying historical transactions")
+        .about("Tool for replaying historical transactions. Designed to be used with anvil/hh node.")
         .arg(arg!(--historical_rpc <VALUE>).required(true))
         .arg(arg!(--block <VALUE>).required(true))
         .arg(arg!(--replay_rpc <VALUE>).required(true))
