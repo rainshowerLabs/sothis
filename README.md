@@ -13,4 +13,4 @@ Sothis is a rust crate. You can install it with cargo:
 
 ## Why the name?
 
-Sothis is known as the creator and God of Fódlan, with the ability to rewind time in Fire Emblem: Thee Houses.
+Sothis is known as the creator and God of Fódlan in Fire Emblem: Thee Houses. She has the ability to rewind time at will.
