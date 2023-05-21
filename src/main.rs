@@ -1,7 +1,12 @@
+mod rpc;
+
 use clap::{arg, Command};
 
+use crate::rpc::*;
+
 #[allow(unused_variables)]
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
         .version("0.1.0")
         .author("makemake <vukasin@gostovic.me>")
@@ -11,8 +16,11 @@ fn main() {
         .arg(arg!(--replay_rpc <VALUE>).required(true))
         .get_matches();
 
-    let historical_rpc = matches.get_one::<String>("historical_rpc").expect("required");
-    let block = matches.get_one::<String>("block").expect("required");
-    let replay_rpc = matches.get_one::<String>("replay_rpc").expect("required");
+    let historical_rpc: String = matches.get_one::<String>("historical_rpc").expect("required").to_string();
+    let block: String = matches.get_one::<String>("block").expect("required").to_string();
+    let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
 
+    //post(historical_rpc, "eth_blockNumber".to_string(), "".to_string()).await?;
+
+    Ok(())
 }
