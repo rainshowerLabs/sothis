@@ -27,11 +27,8 @@ pub struct RpcConnection {
 #[async_trait]
 trait RpcRequests {
     async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>>;
-    async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>>;
-    async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>>;
 }
 
-#[allow(unreachable_code, unused_variables)]
 #[async_trait]
 impl RpcRequests for RpcConnection {
     async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>> {
@@ -54,14 +51,6 @@ impl RpcRequests for RpcConnection {
         
         Ok(block_number_hex.to_string())
     }
-
-    async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
-        !unreachable!();
-    }
-
-    async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>> {
-        !unreachable!();
-    }
 }
 
 #[allow(dead_code)]
@@ -79,5 +68,9 @@ impl RpcConnection {
 
     pub async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
         self.send_request(&self.url, "eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
+    }
+    
+    pub async fn get_transaction_by_hash(&self, transaction_hash: String) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "eth_getTransactionByHash", &transaction_hash).await
     }
 }

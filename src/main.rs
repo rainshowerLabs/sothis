@@ -26,8 +26,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let historical_rpc = RpcConnection::new(historical_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
 
-    let block_number = historical_rpc.block_number().await?;
-    println!("Block number: {}", block_number);
-
     Ok(())
 }
