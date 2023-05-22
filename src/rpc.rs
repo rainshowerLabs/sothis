@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
-use async_trait::async_trait;
 
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
@@ -24,13 +23,15 @@ pub struct RpcConnection {
     url: String
 }
 
-#[async_trait]
-trait RpcRequests {
-    async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>>;
-}
+#[allow(dead_code)]
+impl RpcConnection {
+    pub fn new(url: String) -> Self {
+        Self {
+            client: Client::new(),
+            url,
+        }
+    }
 
-#[async_trait]
-impl RpcRequests for RpcConnection {
     async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>> {
         let request = JsonRpcRequest {
             jsonrpc: "2.0".to_string(),
@@ -50,16 +51,6 @@ impl RpcRequests for RpcConnection {
         let block_number_hex = response.result;
         
         Ok(block_number_hex.to_string())
-    }
-}
-
-#[allow(dead_code)]
-impl RpcConnection {
-    pub fn new(url: String) -> Self {
-        Self {
-            client: Client::new(),
-            url,
-        }
     }
 
     pub async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
