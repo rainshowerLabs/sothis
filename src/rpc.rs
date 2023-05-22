@@ -31,6 +31,7 @@ trait RpcRequests {
     async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>>;
 }
 
+#[allow(unreachable_code, unused_variables)]
 #[async_trait]
 impl RpcRequests for RpcConnection {
     async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>> {
@@ -55,11 +56,11 @@ impl RpcRequests for RpcConnection {
     }
 
     async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
-        self.send_request(&self.url, "eth_blockNumber", "").await
+        !unreachable!();
     }
 
     async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>> {
-        self.send_request(&self.url, "eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
+        !unreachable!();
     }
 }
 
