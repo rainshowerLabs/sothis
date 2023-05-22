@@ -19,14 +19,13 @@ struct JsonRpcResponse {
     id: u32,
 }
 
-struct RpcConnection {
+pub struct RpcConnection {
     client: Client,
     url: String
 }
 
 #[async_trait]
 trait RpcRequests {
-    fn new(url: String) -> Self;
     async fn post(&self, url: String, method: String, param: String) -> Result<String, Box<dyn std::error::Error>>;
     async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>>;
     async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>>;
@@ -34,13 +33,6 @@ trait RpcRequests {
 
 #[async_trait]
 impl RpcRequests for RpcConnection {
-    fn new(url: String) -> Self {
-        Self {
-            client: Client::new(),
-            url: url
-        }
-    }
-
     async fn post(&self, url: String, method: String, param: String) -> Result<String, Box<dyn std::error::Error>> {
         let request = JsonRpcRequest {
             jsonrpc: "2.0".to_string(),
@@ -70,5 +62,14 @@ impl RpcRequests for RpcConnection {
     // Get block by number
     async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
         self.post(self.url.clone(), "eth_getBlockByNumber".to_string(), format!("\"{}\", true", block_number)).await
+    }
+}
+
+impl RpcConnection {
+    pub fn new(url: String) -> Self {
+        Self {
+            client: Client::new(),
+            url,
+        }
     }
 }

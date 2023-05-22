@@ -1,6 +1,7 @@
 mod rpc;
 
 use clap::{arg, Command};
+use crate::rpc::RpcConnection;
 
 // TODO:
 // add logic to send transactions from blocks
@@ -21,6 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let historical_rpc: String = matches.get_one::<String>("historical_rpc").expect("required").to_string();
     let block: String = matches.get_one::<String>("block").expect("required").to_string();
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+
+    let historical_rpc = RpcConnection::new(historical_rpc);
+    let replay_rpc = RpcConnection::new(replay_rpc);
 
     //post(historical_rpc, "eth_blockNumber".to_string(), "".to_string()).await?;
 
