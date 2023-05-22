@@ -38,7 +38,7 @@ impl RpcRequests for RpcConnection {
             params: json!(param),
             id: 1,
         };
-        
+
         let response = self.client
             .post(url)
             .json(&request)
