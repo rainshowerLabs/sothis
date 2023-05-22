@@ -26,23 +26,23 @@ pub struct RpcConnection {
 
 #[async_trait]
 trait RpcRequests {
-    async fn post(&self, url: String, method: String, param: String) -> Result<String, Box<dyn std::error::Error>>;
+    async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>>;
     async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>>;
-    async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>>;
+    async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>>;
 }
 
 #[async_trait]
 impl RpcRequests for RpcConnection {
-    async fn post(&self, url: String, method: String, param: String) -> Result<String, Box<dyn std::error::Error>> {
+    async fn send_request(&self, url: &str, method: &str, param: &str) -> Result<String, Box<dyn std::error::Error>> {
         let request = JsonRpcRequest {
             jsonrpc: "2.0".to_string(),
-            method,
+            method: method.to_string(),
             params: json!(param),
             id: 1,
         };
         
         let response = self.client
-            .post(&url)
+            .post(url)
             .json(&request)
             .send()
             .await?
@@ -54,22 +54,29 @@ impl RpcRequests for RpcConnection {
         Ok(block_number_hex.to_string())
     }
 
-    // Gets blocknumber
     async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
-        self.post(self.url.clone(), "eth_blockNumber".to_string(), "".to_string()).await
+        self.send_request(&self.url, "eth_blockNumber", "").await
     }
 
-    // Get block by number
-    async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
-        self.post(self.url.clone(), "eth_getBlockByNumber".to_string(), format!("\"{}\", true", block_number)).await
+    async fn get_block_by_number(&self, block_number: &str) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
     }
 }
 
+#[allow(dead_code)]
 impl RpcConnection {
     pub fn new(url: String) -> Self {
         Self {
             client: Client::new(),
             url,
         }
+    }
+
+    pub async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "eth_blockNumber", "").await
+    }
+
+    pub async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
     }
 }
