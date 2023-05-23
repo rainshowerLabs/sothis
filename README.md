@@ -2,7 +2,7 @@
 
 # `sothis`
 
-Sothis is a tool for replaying historical blocks on a local testnet node. ***Sothis uses anvil/hardhat node specific RPC calls and does not work on regular networks***
+Sothis is a tool for replaying historical state on a local testnet node. ***Sothis uses anvil/hardhat node specific RPC calls and does not work on regular networks***
 
 ## Usage
 
