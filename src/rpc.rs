@@ -64,4 +64,20 @@ impl RpcConnection {
     pub async fn get_transaction_by_hash(&self, transaction_hash: String) -> Result<String, Box<dyn std::error::Error>> {
         self.send_request(&self.url, "eth_getTransactionByHash", &transaction_hash).await
     }
+
+    pub async fn evm_set_automine(&self, mode: String) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "evm_setAutomine", &mode).await
+    }
+
+    pub async fn evm_mine(&self) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "evm_mine", "").await
+    }
+
+    pub async fn evm_set_interval_mining(&self, interval: String) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "evm_setIntervalMining", &interval).await
+    }
+
+    pub async fn evm_set_next_block_timestamp(&self, timestamp: String) -> Result<String, Box<dyn std::error::Error>> {
+        self.send_request(&self.url, "evm_setNextBlockTimestamp", &timestamp).await
+    }
 }
