@@ -6,10 +6,10 @@ use super::format::format_hex;
 
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
-    jsonrpc: String,
     method: String,
     params: Value,
     id: u32,
+    jsonrpc: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -25,7 +25,7 @@ pub struct RpcConnection {
     url: String,
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, unused_variables)]
 impl RpcConnection {
     pub fn new(url: String) -> Self {
         Self {
@@ -40,11 +40,15 @@ impl RpcConnection {
         param: &str,
     ) -> Result<String, reqwest::Error> {
         let request = JsonRpcRequest {
-            jsonrpc: "2.0".to_string(),
             method: method.to_string(),
-            params: json!(param),
+            params: json!([param]),
             id: 1,
+            jsonrpc: "2.0".to_string(),
         };
+
+        println!("Sending request: {:?}", request);
+
+        
 
         let response = self
             .client
@@ -54,8 +58,6 @@ impl RpcConnection {
             .await?
             .json::<JsonRpcResponse>()
             .await?;
-
-        println!("{:?}", response);
         
         Ok(response.result.to_string())
     }
@@ -76,7 +78,7 @@ impl RpcConnection {
         &self,
         block_number: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("eth_getBlockByNumber", &format!("\"{}\", true", block_number),).await
+        self.send_request("eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
     }
 
     pub async fn get_transaction_by_hash( &self, tx_hash: String) -> Result<String, reqwest::Error> {
