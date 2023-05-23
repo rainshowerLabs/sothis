@@ -1,7 +1,7 @@
 mod rpc;
 
 use clap::{arg, Command};
-use crate::rpc::RpcConnection;
+use rpc::rpc::RpcConnection;
 
 // TODO:
 // add logic to send transactions from blocks
@@ -25,6 +25,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let historical_rpc = RpcConnection::new(historical_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
+
+    // print blocknumber
+    println!("{}", historical_rpc.get_block_by_number(block).await?);
 
     Ok(())
 }

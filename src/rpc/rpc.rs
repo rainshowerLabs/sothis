@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
 
+use super::format::format_hex;
+
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
     jsonrpc: String,
@@ -54,7 +56,9 @@ impl RpcConnection {
     }
 
     pub async fn block_number(&self) -> Result<String, Box<dyn std::error::Error>> {
-        self.send_request(&self.url, "eth_blockNumber", "").await
+        let number = self.send_request(&self.url, "eth_blockNumber", "").await?;
+        let return_number = format_hex(&number);
+        Ok(return_number.to_string())
     }
 
     pub async fn get_block_by_number(&self, block_number: String) -> Result<String, Box<dyn std::error::Error>> {
