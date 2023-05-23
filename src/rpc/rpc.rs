@@ -48,14 +48,16 @@ impl RpcConnection {
 
         println!("Sending request: {:?}", request);
 
-        
-
         let response = self
             .client
             .post(&self.url)
             .json(&request)
             .send()
-            .await?
+            .await?;
+
+        println!("{:?}", response);
+
+        let response = response
             .json::<JsonRpcResponse>()
             .await?;
         
