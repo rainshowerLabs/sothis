@@ -1,6 +1,8 @@
+![sothis_logo](https://github.com/makemake-kbo/sothis/assets/55022497/c4508232-71e2-42c8-aaec-aa35c668983b)
+
 # `sothis`
 
-Sothis is a tool for replaying historical blocks on a local testnet node. ***Sothis uses anvil/hardhat node specific RPC calls and does not work on regular networks***
+Sothis is a tool for replaying historical state on a local testnet node. ***Sothis uses anvil/hardhat node specific RPC calls and does not work on regular networks***
 
 ## Usage
 
