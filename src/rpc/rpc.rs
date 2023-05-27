@@ -59,8 +59,6 @@ impl RpcConnection {
             });
         }
 
-        println!("Sending request: {}", request);
-
         let response = self
             .client
             .post(&self.url)
