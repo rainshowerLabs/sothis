@@ -39,11 +39,11 @@ impl RpcConnection {
     async fn send_request(
         &self,
         method: &str,
-        param: &str,
+        params: Value,
     ) -> Result<String, reqwest::Error> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
-        if param == "" {
+        if params.is_null() {
             request = json!({
                 "method": method.to_string(),
                 "params": [],
@@ -53,7 +53,7 @@ impl RpcConnection {
         } else {
             request = json!({
                 "method": method.to_string(),
-                "params": [param],
+                "params": params,
                 "id": 1,
                 "jsonrpc": "2.0".to_string(),
             });
@@ -80,13 +80,16 @@ impl RpcConnection {
     */
 
     pub async fn block_number(&self) -> Result<String, reqwest::Error> {
-        let number = self.send_request("eth_blockNumber", "").await?;
+        // Empty `Value` to statisfy the call params
+
+
+        let number = self.send_request("eth_blockNumber", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
     pub async fn chain_id(&self) -> Result<String, reqwest::Error> {
-        let number = self.send_request("eth_chainId", "").await?;
+        let number = self.send_request("eth_chainId", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
@@ -95,34 +98,37 @@ impl RpcConnection {
         &self,
         block_number: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("eth_getBlockByNumber", &format!("\"{}\", true", block_number)).await
+
+        let params = json!([block_number, true]);
+
+        self.send_request("eth_getBlockByNumber", params).await
     }
 
     pub async fn get_transaction_by_hash( &self, tx_hash: String) -> Result<String, reqwest::Error> {
-        self.send_request("eth_getTransactionByHash", &tx_hash)
+        self.send_request("eth_getTransactionByHash", serde_json::Value::Null)
             .await
     }
 
     pub async fn evm_set_automine(&self, mode: String) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setAutomine", &mode).await
+        self.send_request("evm_setAutomine", serde_json::Value::Null).await
     }
 
     pub async fn evm_mine(&self) -> Result<String, reqwest::Error> {
-        self.send_request("evm_mine", "").await
+        self.send_request("evm_mine", serde_json::Value::Null).await
     }
 
     pub async fn evm_set_interval_mining(
         &self,
         interval: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setIntervalMining", &interval).await
+        self.send_request("evm_setIntervalMining", serde_json::Value::Null).await
     }
 
     pub async fn evm_set_next_block_timestamp(
         &self,
         timestamp: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setNextBlockTimestamp", &timestamp)
+        self.send_request("evm_setNextBlockTimestamp", serde_json::Value::Null)
             .await
     }
 }
