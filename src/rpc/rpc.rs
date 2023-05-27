@@ -71,11 +71,9 @@ impl RpcConnection {
         Ok(response.result.to_string())
     }
 
-    /*
-    //////////////////////////////////////////////////////////////
-                            JSON-RPC METHODS
-    //////////////////////////////////////////////////////////////
-    */
+    /* 
+     * JSON-RPC methods
+     */
 
     // Gets current block_number.
     pub async fn block_number(&self) -> Result<String, reqwest::Error> {
@@ -112,7 +110,9 @@ impl RpcConnection {
         self.send_request("eth_sendTransaction", params).await
     }
 
-    /* hardhat/anvil specific rpc */
+    /* 
+     * hardhat/anvil specific RPC
+     */
 
     // Turn automining on/off. If on, mines on every tx.
     pub async fn evm_set_automine(&self, mode: bool) -> Result<String, reqwest::Error> {
