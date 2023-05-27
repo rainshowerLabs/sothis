@@ -119,10 +119,10 @@ impl RpcConnection {
         self.send_request("evm_mine", serde_json::Value::Null).await
     }
 
-    // Set the interval at which we mine blocks.
+    // Set the interval at which we mine blocks in ms.
     pub async fn evm_set_interval_mining(
         &self,
-        interval: String,
+        interval: u64,
     ) -> Result<String, reqwest::Error> {
         let params = json!([interval]);
         self.send_request("evm_setIntervalMining", params).await
@@ -131,7 +131,7 @@ impl RpcConnection {
     // Set the next block's timestamp.
     pub async fn evm_set_next_block_timestamp(
         &self,
-        timestamp: String,
+        timestamp: u64,
     ) -> Result<String, reqwest::Error> {
         let params = json!([timestamp]);
         self.send_request("evm_setNextBlockTimestamp", params).await

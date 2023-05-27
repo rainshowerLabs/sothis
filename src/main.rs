@@ -26,9 +26,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let historical_rpc = RpcConnection::new(historical_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
 
-    // print blocknumber
-    let a = historical_rpc.get_transaction_by_hash("0x78363a7646d280504db5ce096d091cbdfc56d230b3ad757666b7e5b196aa1819".to_string()).await?;
-    println!("{}", a);
-
     Ok(())
 }
