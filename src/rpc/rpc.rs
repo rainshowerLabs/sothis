@@ -25,8 +25,9 @@ pub struct RpcConnection {
     url: String,
 }
 
-#[allow(dead_code, unused_variables)]
+#[allow(dead_code)]
 impl RpcConnection {
+    // Create client and set url
     pub fn new(url: String) -> Self {
         Self {
             client: Client::new(),
@@ -34,35 +35,49 @@ impl RpcConnection {
         }
     }
 
+    // Generic fn to send rpc
     async fn send_request(
         &self,
         method: &str,
         param: &str,
     ) -> Result<String, reqwest::Error> {
-        let request = JsonRpcRequest {
-            method: method.to_string(),
-            params: json!([param]),
-            id: 1,
-            jsonrpc: "2.0".to_string(),
-        };
+        // We do this because eth rpc cries if param is empty
+        let request: Value;
+        if param == "" {
+            request = json!({
+                "method": method.to_string(),
+                "params": [],
+                "id": 1,
+                "jsonrpc": "2.0".to_string(),
+            });
+        } else {
+            request = json!({
+                "method": method.to_string(),
+                "params": [param],
+                "id": 1,
+                "jsonrpc": "2.0".to_string(),
+            });
+        }
 
-        println!("Sending request: {:?}", request);
+        println!("Sending request: {}", request);
 
         let response = self
             .client
             .post(&self.url)
             .json(&request)
             .send()
-            .await?;
-
-        println!("{:?}", response);
-
-        let response = response
+            .await?
             .json::<JsonRpcResponse>()
             .await?;
-        
+
         Ok(response.result.to_string())
     }
+
+    /*
+    //////////////////////////////////////////////////////////////
+                            JSON-RPC METHODS
+    //////////////////////////////////////////////////////////////
+    */
 
     pub async fn block_number(&self) -> Result<String, reqwest::Error> {
         let number = self.send_request("eth_blockNumber", "").await?;
