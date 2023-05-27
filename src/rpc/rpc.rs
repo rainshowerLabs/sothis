@@ -106,6 +106,14 @@ impl RpcConnection {
         self.send_request("eth_getTransactionByHash", params).await
     }
 
+    // Send transaction
+    pub async fn send_transaction(&self, tx: String) -> Result<String, reqwest::Error> {
+        let params = json!([tx]);
+        self.send_request("eth_sendTransaction", params).await
+    }
+
+    /* hardhat/anvil specific rpc */
+
     // Turn automining on/off. If on, mines on every tx.
     pub async fn evm_set_automine(&self, mode: bool) -> Result<String, reqwest::Error> {
         let params = json!([mode]);

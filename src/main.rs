@@ -1,11 +1,9 @@
 mod rpc;
+mod replay;
 
 use clap::{arg, Command};
 use rpc::rpc::RpcConnection;
-
-// TODO:
-// add logic to send transactions from blocks
-// add logic to set local evm to mine blocks, and force mine when done with a block
+//use crate::replay::*;
 
 #[allow(unused_variables)]
 #[tokio::main]
