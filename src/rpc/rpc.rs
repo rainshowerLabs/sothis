@@ -79,56 +79,61 @@ impl RpcConnection {
     //////////////////////////////////////////////////////////////
     */
 
+    // Gets current block_number.
     pub async fn block_number(&self) -> Result<String, reqwest::Error> {
-        // Empty `Value` to statisfy the call params
-
-
         let number = self.send_request("eth_blockNumber", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
+    // Gets current chain_id.
     pub async fn chain_id(&self) -> Result<String, reqwest::Error> {
         let number = self.send_request("eth_chainId", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
+    // Gets block info and hashes by block number.
     pub async fn get_block_by_number(
         &self,
         block_number: String,
     ) -> Result<String, reqwest::Error> {
-
         let params = json!([block_number, true]);
-
         self.send_request("eth_getBlockByNumber", params).await
     }
 
+    // Gets transaction by hash (duh).
     pub async fn get_transaction_by_hash( &self, tx_hash: String) -> Result<String, reqwest::Error> {
-        self.send_request("eth_getTransactionByHash", serde_json::Value::Null)
-            .await
+        let params = json!([tx_hash]);
+        self.send_request("eth_getTransactionByHash", params).await
     }
 
-    pub async fn evm_set_automine(&self, mode: String) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setAutomine", serde_json::Value::Null).await
+    // Turn automining on/off. If on, mines on every tx.
+    pub async fn evm_set_automine(&self, mode: bool) -> Result<String, reqwest::Error> {
+        let params = json!([mode]);
+        self.send_request("evm_setAutomine", params).await
     }
 
+    // Mines a block.
     pub async fn evm_mine(&self) -> Result<String, reqwest::Error> {
         self.send_request("evm_mine", serde_json::Value::Null).await
     }
 
+    // Set the interval at which we mine blocks.
     pub async fn evm_set_interval_mining(
         &self,
         interval: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setIntervalMining", serde_json::Value::Null).await
+        let params = json!([interval]);
+        self.send_request("evm_setIntervalMining", params).await
     }
 
+    // Set the next block's timestamp.
     pub async fn evm_set_next_block_timestamp(
         &self,
         timestamp: String,
     ) -> Result<String, reqwest::Error> {
-        self.send_request("evm_setNextBlockTimestamp", serde_json::Value::Null)
-            .await
+        let params = json!([timestamp]);
+        self.send_request("evm_setNextBlockTimestamp", params).await
     }
 }
