@@ -59,6 +59,11 @@ impl RpcConnection {
             });
         }
 
+        #[cfg(debug_assertions)]
+        {
+            println!("Sending request: {}", request.clone());
+        }
+
         let response = self
             .client
             .post(&self.url)
@@ -67,6 +72,13 @@ impl RpcConnection {
             .await?
             .json::<JsonRpcResponse>()
             .await?;
+
+        #[cfg(debug_assertions)]
+        {
+            // we need to clone the response here
+            println!("Received response: {:?}", &response);
+        
+        }
 
         Ok(response.result.to_string())
     }
