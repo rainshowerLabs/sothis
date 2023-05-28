@@ -22,7 +22,7 @@ struct JsonRpcResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
-struct BlockResult {
+pub struct BlockResult {
     difficulty: String,
     extraData: String,
     gasLimit: String,
@@ -47,7 +47,7 @@ struct BlockResult {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
-struct Transaction {
+pub struct Transaction {
     blockHash: String,
     blockNumber: String,
     from: String,
