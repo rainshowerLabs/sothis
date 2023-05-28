@@ -20,6 +20,52 @@ struct JsonRpcResponse {
     id: u32,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+#[allow(dead_code, non_snake_case)]
+struct BlockResult {
+    difficulty: String,
+    extraData: String,
+    gasLimit: String,
+    gasUsed: String,
+    hash: String,
+    logsBloom: String,
+    miner: String,
+    mixHash: String,
+    nonce: String,
+    number: String,
+    parentHash: String,
+    receiptsRoot: String,
+    sha3Uncles: String,
+    size: String,
+    stateRoot: String,
+    timestamp: String,
+    totalDifficulty: String,
+    transactions: Vec<Transaction>,
+    transactionsRoot: String,
+    uncles: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[allow(dead_code, non_snake_case)]
+struct Transaction {
+    blockHash: String,
+    blockNumber: String,
+    from: String,
+    gas: String,
+    gasPrice: String,
+    hash: String,
+    input: String,
+    nonce: String,
+    r: String,
+    s: String,
+    to: String,
+    transactionIndex: String,
+    #[serde(rename = "type")]
+    txType: String,
+    v: String,
+    value: String,
+}
+
 pub struct RpcConnection {
     client: Client,
     url: String,
@@ -75,8 +121,7 @@ impl RpcConnection {
 
         #[cfg(debug_assertions)]
         {
-            // we need to clone the response here
-            println!("Received response: {:?}", &response);
+            println!("Received response: {:#?}", &response);
         
         }
 
