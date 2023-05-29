@@ -50,20 +50,33 @@ pub struct BlockResult {
 pub struct Transaction {
     blockHash: String,
     blockNumber: String,
-    from: String,
-    gas: String,
-    gasPrice: String,
-    hash: String,
-    input: String,
-    nonce: String,
+    pub from: String,
+    pub gas: String,
+    pub gasPrice: String,
+    pub hash: String,
+    pub input: String,
+    pub nonce: String,
     r: String,
     s: String,
-    to: String,
+    pub to: String,
     transactionIndex: String,
     #[serde(rename = "type")]
     txType: String,
     v: String,
-    value: String,
+    pub value: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[allow(non_snake_case)]
+pub struct TransactionParams {
+    pub from: String,
+    pub to: String,
+    pub value: String,
+    pub gas: String,
+    pub gasPrice: String,
+    pub data: String,
+    pub nonce: String,
+    pub chainId: Option<String>,
 }
 
 pub struct RpcConnection {
@@ -153,7 +166,7 @@ impl RpcConnection {
         block_number: String,
     ) -> Result<String, reqwest::Error> {
         let params = json!([block_number, true]);
-        self.send_request("eth_getBlockByNumber", params).await
+        Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
 
     // Gets transaction by hash (duh).
@@ -162,16 +175,16 @@ impl RpcConnection {
         tx_hash: String,
     ) -> Result<String, reqwest::Error> {
         let params = json!([tx_hash]);
-        self.send_request("eth_getTransactionByHash", params).await
+        Ok(self.send_request("eth_getTransactionByHash", params).await?)
     }
 
     // Send transaction
     pub async fn send_transaction(
         &self,
-        tx: Transaction
+        tx: TransactionParams,
     ) -> Result<String, reqwest::Error> {
         let params = serde_json::to_value(tx).unwrap();
-        self.send_request("eth_sendTransaction", params).await
+        Ok(self.send_request("eth_sendTransaction", params).await?)
     }
 
     /* 
@@ -184,12 +197,12 @@ impl RpcConnection {
         mode: bool,
     ) -> Result<String, reqwest::Error> {
         let params = json!([mode]);
-        self.send_request("evm_setAutomine", params).await
+        Ok(self.send_request("evm_setAutomine", params).await?)
     }
 
     // Mines a block.
     pub async fn evm_mine(&self) -> Result<String, reqwest::Error> {
-        self.send_request("evm_mine", serde_json::Value::Null).await
+        Ok(self.send_request("evm_mine", serde_json::Value::Null).await?)
     }
 
     // Set the interval at which we mine blocks in ms.
@@ -198,7 +211,7 @@ impl RpcConnection {
         interval: u64,
     ) -> Result<String, reqwest::Error> {
         let params = json!([interval]);
-        self.send_request("evm_setIntervalMining", params).await
+        Ok(self.send_request("evm_setIntervalMining", params).await?)
     }
 
     // Set the next block's timestamp.
@@ -207,6 +220,6 @@ impl RpcConnection {
         timestamp: u64,
     ) -> Result<String, reqwest::Error> {
         let params = json!([timestamp]);
-        self.send_request("evm_setNextBlockTimestamp", params).await
+        Ok(self.send_request("evm_setNextBlockTimestamp", params).await?)
     }
 }

@@ -1,6 +1,8 @@
 use crate::RpcConnection;
 use crate::rpc::rpc::BlockResult;
+use crate::rpc::rpc::TransactionParams;
 //use crate::rpc::rpc::Transaction;
+
 
 // To replay blocks we:
 // 1) Make sure that the replay rpc block is equal to `block`
@@ -11,6 +13,9 @@ use crate::rpc::rpc::BlockResult;
 // 6) Loop for all transactions in a block
 // 7) Set next block timestamp
 // 8) `evm_mine` the block
+
+
+
 pub async fn replay_blocks(
     historic_rpc: RpcConnection,
     replay_rpc: RpcConnection,
@@ -41,7 +46,19 @@ pub async fn replay_blocks(
 
         // send transactions to mempool
         for tx in historical_txs {
-            replay_rpc.send_transaction(tx).await?;
+            let broadcast_tx= TransactionParams {
+                from: tx.from,
+                to: tx.to,
+                value: tx.value,
+                gas: tx.gas,
+                gasPrice: tx.gasPrice,
+                data: tx.input,
+                nonce: tx.nonce,
+                chainId: Some(historical_chainid.clone()),
+            };
+
+            replay_rpc.send_transaction(broadcast_tx).await?;
+
         }
 
         // set next block timestamp
