@@ -3,7 +3,7 @@ mod replay;
 
 use clap::{arg, Command};
 use rpc::rpc::RpcConnection;
-//use crate::replay::*;
+use crate::replay::*;
 
 #[allow(unused_variables)]
 #[tokio::main]
@@ -23,6 +23,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let historical_rpc = RpcConnection::new(historical_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
+
+    replay_blocks(historical_rpc, replay_rpc, &block).await?;
 
     Ok(())
 }

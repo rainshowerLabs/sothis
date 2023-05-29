@@ -115,8 +115,6 @@ impl RpcConnection {
             .post(&self.url)
             .json(&request)
             .send()
-            .await?
-            .json::<JsonRpcResponse>()
             .await?;
 
         #[cfg(debug_assertions)]
@@ -124,6 +122,9 @@ impl RpcConnection {
             println!("Received response: {:#?}", &response);
         
         }
+        let response: JsonRpcResponse = response
+            .json::<JsonRpcResponse>()
+            .await?;
 
         Ok(response.result.to_string())
     }
@@ -167,9 +168,9 @@ impl RpcConnection {
     // Send transaction
     pub async fn send_transaction(
         &self,
-        tx: String,
+        tx: Transaction
     ) -> Result<String, reqwest::Error> {
-        let params = json!([tx]);
+        let params = serde_json::to_value(tx).unwrap();
         self.send_request("eth_sendTransaction", params).await
     }
 

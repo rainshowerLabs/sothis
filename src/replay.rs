@@ -11,11 +11,9 @@ use crate::rpc::rpc::BlockResult;
 // 6) Loop for all transactions in a block
 // 7) Set next block timestamp
 // 8) `evm_mine` the block
-#[allow(dead_code, unused_variables)]
 pub async fn replay_blocks(
     historic_rpc: RpcConnection,
     replay_rpc: RpcConnection,
-    block: &str,
     until: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // make sure that both rpcs have the same chainid to satisfy the replay thingy
@@ -32,10 +30,10 @@ pub async fn replay_blocks(
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
     // get block mumber of replay node
-    let mut replay_block = replay_rpc.get_block_by_number(block.to_string()).await?;
+    let mut replay_block = replay_rpc.block_number().await?;
     while until != replay_block {
         // get block from historical node
-        let historical_block = historic_rpc.get_block_by_number(replay_block).await?;
+        let historical_block = historic_rpc.get_block_by_number(replay_block.clone()).await?;
 
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
@@ -43,7 +41,7 @@ pub async fn replay_blocks(
 
         // send transactions to mempool
         for tx in historical_txs {
-            let tx_hash = replay_rpc.send_transaction(serde_json::to_string(&tx)?).await?;
+            replay_rpc.send_transaction(tx).await?;
         }
 
         // set next block timestamp
@@ -51,13 +49,13 @@ pub async fn replay_blocks(
             historical_block.timestamp.parse::<u64>()?,
         ).await?;
 
+        println!("Successfully replayed block {}", &replay_block);
+
         // get next block
-        replay_block = replay_rpc.get_block_by_number(block.to_string()).await?;
+        replay_block = replay_rpc.block_number().await?;
 
         // mine the block
-        replay_rpc.evm_mine().await?;
-        println!("Successfully replayed block {}", &replay_block);
-    
+        replay_rpc.evm_mine().await?;    
     }
     println!("Done replaying blocks");
     Ok(())
