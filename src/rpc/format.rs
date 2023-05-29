@@ -10,6 +10,21 @@ pub fn format_hex (hex: &str) -> &str {
 	}
 }
 
+pub fn hex_to_decimal(hex_string: &str) -> Result<u64, std::num::ParseIntError> {
+	// remove 0x prefix if it exists
+	let hex_string = if hex_string.starts_with("0x") {
+		&hex_string[2..]
+	} else {
+		hex_string
+	};
+
+    u64::from_str_radix(hex_string, 16)
+}
+
+pub fn decimal_to_hex(decimal: u64) -> String {
+    format!("0x{:x}", decimal)
+}
+
 // Serialize block to BlockResult Struct
 // pub fn serialize_block(block_as_str: &str) -> Result<BlockResult, serde_json::Error> {
 // 	let block: BlockResult = serde_json::from_str(block_as_str)?;

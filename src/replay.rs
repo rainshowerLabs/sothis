@@ -1,4 +1,5 @@
 use crate::RpcConnection;
+use crate::rpc::format::*;
 use crate::rpc::rpc::BlockResult;
 use crate::rpc::rpc::TransactionParams;
 //use crate::rpc::rpc::Transaction;
@@ -37,8 +38,12 @@ pub async fn replay_blocks(
     // get block mumber of replay node
     let mut replay_block = replay_rpc.block_number().await?;
     while until != replay_block {
+        // we write a bit of illegible code
+        let decimal = hex_to_decimal(&replay_block)?;
+        let hex_block = decimal_to_hex(decimal + 1);
+
         // get block from historical node
-        let historical_block = historic_rpc.get_block_by_number(replay_block.clone()).await?;
+        let historical_block = historic_rpc.get_block_by_number(hex_block).await?;
 
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
