@@ -132,12 +132,6 @@ impl RpcConnection {
             .json::<JsonRpcResponse>()
             .await?;
 
-        #[cfg(debug_assertions)]
-        {
-            println!("Received response: {:#?}", &response);
-        
-        }
-
         Ok(response.result.to_string())
     }
 
@@ -182,8 +176,8 @@ impl RpcConnection {
         &self,
         tx: TransactionParams,
     ) -> Result<String, reqwest::Error> {
-        let params = serde_json::to_value(tx).unwrap();
-        Ok(self.send_request("eth_sendTransaction", params).await?)
+        let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
+        Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
     }
 
     /* 
