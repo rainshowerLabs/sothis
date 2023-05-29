@@ -28,5 +28,7 @@ pub async fn replay_blocks(
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
+    
+    
     Ok(())
 }
