@@ -1,4 +1,6 @@
 use crate::RpcConnection;
+use crate::rpc::rpc::BlockResult;
+//use crate::rpc::rpc::Transaction;
 
 // To replay blocks we:
 // 1) Make sure that the replay rpc block is equal to `block`
@@ -14,6 +16,7 @@ pub async fn replay_blocks(
     historic_rpc: RpcConnection,
     replay_rpc: RpcConnection,
     block: &str,
+    until: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // make sure that both rpcs have the same chainid to satisfy the replay thingy
     let historical_chainid = historic_rpc.chain_id().await?;
@@ -28,7 +31,34 @@ pub async fn replay_blocks(
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
+    // get block mumber of replay node
+    let mut replay_block = replay_rpc.get_block_by_number(block.to_string()).await?;
+    while until != replay_block {
+        // get block from historical node
+        let historical_block = historic_rpc.get_block_by_number(replay_block).await?;
+
+        // get transaction hashes from block
+        let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
+        let historical_txs = historical_block.transactions;
+
+        // send transactions to mempool
+        for tx in historical_txs {
+            let tx_hash = replay_rpc.send_transaction(serde_json::to_string(&tx)?).await?;
+        }
+
+        // set next block timestamp
+        replay_rpc.evm_set_next_block_timestamp(
+            historical_block.timestamp.parse::<u64>()?,
+        ).await?;
+
+        // get next block
+        replay_block = replay_rpc.get_block_by_number(block.to_string()).await?;
+
+        // mine the block
+        replay_rpc.evm_mine().await?;
+        println!("Successfully replayed block {}", &replay_block);
     
-    
+    }
+    println!("Done replaying blocks");
     Ok(())
 }

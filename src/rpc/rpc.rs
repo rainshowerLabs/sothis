@@ -38,9 +38,9 @@ pub struct BlockResult {
     sha3Uncles: String,
     size: String,
     stateRoot: String,
-    timestamp: String,
+    pub timestamp: String,
     totalDifficulty: String,
-    transactions: Vec<Transaction>,
+    pub transactions: Vec<Transaction>,
     transactionsRoot: String,
     uncles: Vec<String>,
 }
