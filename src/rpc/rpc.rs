@@ -183,7 +183,7 @@ impl RpcConnection {
         tx: TransactionParams,
     ) -> Result<String, reqwest::Error> {
         let params = serde_json::to_value(tx).unwrap();
-        Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
+        Ok(self.send_request("eth_sendTransaction", params).await?)
     }
 
     /* 
