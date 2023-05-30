@@ -31,7 +31,7 @@ pub async fn replay_blocks(
     }
 
     // get block mumber of replay node
-    let mut replay_block = replay_rpc.block_number().await?;
+    let replay_block = replay_rpc.block_number().await?;
     if hex_to_decimal(&replay_block)? > hex_to_decimal(until)? {
         return Err("Replay node block must be less than termination block".into());
     }
@@ -43,9 +43,10 @@ pub async fn replay_blocks(
 
     while until != replay_block {
         // we write a bit of illegible code
+        let replay_block = replay_rpc.block_number().await?;
+
         let decimal = hex_to_decimal(&replay_block)?;
         let hex_block = decimal_to_hex(decimal + 1);
-
         // get block from historical node
         let historical_block = historic_rpc.get_block_by_number(hex_block).await?;
 
@@ -77,13 +78,9 @@ pub async fn replay_blocks(
             hex_to_decimal(&historical_block.timestamp)?
         ).await?;
 
-        println!("Successfully replayed block {}", &replay_block);
-
-        // get next block
-        replay_block = replay_rpc.block_number().await?;
-
         // mine the block
-        replay_rpc.evm_mine().await?;    
+        replay_rpc.evm_mine().await?;
+        println!("Successfully replayed block {}", &replay_block);
     }
     println!("Done replaying blocks");
     Ok(())
