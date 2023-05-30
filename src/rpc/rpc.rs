@@ -58,7 +58,7 @@ pub struct Transaction {
     pub nonce: String,
     r: String,
     s: String,
-    pub to: String,
+    pub to: Option<String>,
     transactionIndex: String,
     #[serde(rename = "type")]
     txType: String,
@@ -70,7 +70,7 @@ pub struct Transaction {
 #[allow(non_snake_case)]
 pub struct TransactionParams {
     pub from: String,
-    pub to: String,
+    pub to: Option<String>,
     pub value: String,
     pub gas: String,
     pub gasPrice: String,

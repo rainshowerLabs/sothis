@@ -53,10 +53,9 @@ pub async fn replay_blocks(
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
         let historical_txs = historical_block.transactions;
-
         // send transactions to mempool
         for tx in historical_txs {
-            let broadcast_tx= TransactionParams {
+            let tx = TransactionParams {
                 from: tx.from,
                 to: tx.to,
                 value: tx.value,
@@ -67,7 +66,7 @@ pub async fn replay_blocks(
                 chainId: Some(historical_chainid.clone()),
             };
 
-            replay_rpc.send_unsigned_transaction(broadcast_tx).await?;
+            replay_rpc.send_unsigned_transaction(tx).await?;
         }
 
         println!("{:?}", historical_block.timestamp);
