@@ -178,12 +178,21 @@ impl RpcConnection {
         tx: TransactionParams,
     ) -> Result<String, reqwest::Error> {
         let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
-        Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
+        Ok(self.send_request("eth_sendTransaction", params).await?)
     }
 
     /* 
      * hardhat/anvil specific RPC
      */
+
+    // Send tx without checking signature
+    pub async fn send_unsigned_transaction(
+        &self,
+        tx: TransactionParams,
+    ) -> Result<String, reqwest::Error> {
+        let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
+        Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
+    }
 
     // Turn automining on/off. If on, mines on every tx.
     pub async fn evm_set_automine(

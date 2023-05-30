@@ -67,8 +67,7 @@ pub async fn replay_blocks(
                 chainId: Some(historical_chainid.clone()),
             };
 
-            replay_rpc.send_transaction(broadcast_tx).await?;
-
+            replay_rpc.send_unsigned_transaction(broadcast_tx).await?;
         }
 
         println!("{:?}", historical_block.timestamp);
