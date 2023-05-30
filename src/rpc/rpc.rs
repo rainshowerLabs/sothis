@@ -118,8 +118,7 @@ impl RpcConnection {
             });
         }
 
-        #[cfg(debug_assertions)]
-        {
+        #[cfg(debug_assertions)] {
             println!("Sending request: {}", request.clone());
         }
 
@@ -132,7 +131,9 @@ impl RpcConnection {
             .json::<JsonRpcResponse>()
             .await?;
 
-        println!("{}", method);
+        #[cfg(debug_assertions)] {
+            println!("{}", method);
+        }
         Ok(response.result.to_string())
     }
 
