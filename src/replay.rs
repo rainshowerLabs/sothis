@@ -30,13 +30,17 @@ pub async fn replay_blocks(
         return Err("Chain IDs don't match".into());
     }
 
+    // get block mumber of replay node
+    let mut replay_block = replay_rpc.block_number().await?;
+    if hex_to_decimal(&replay_block)? > hex_to_decimal(until)? {
+        return Err("Replay node block must be less than termination block".into());
+    }
+
     // set automine to false
     replay_rpc.evm_set_automine(false).await?;
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
-    // get block mumber of replay node
-    let mut replay_block = replay_rpc.block_number().await?;
     while until != replay_block {
         // we write a bit of illegible code
         let decimal = hex_to_decimal(&replay_block)?;
@@ -66,9 +70,11 @@ pub async fn replay_blocks(
 
         }
 
+        println!("{:?}", historical_block.timestamp);
+
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
-            historical_block.timestamp.parse::<u64>()?,
+            hex_to_decimal(&historical_block.timestamp)?
         ).await?;
 
         println!("Successfully replayed block {}", &replay_block);
