@@ -1,3 +1,4 @@
+use crate::EXIT_ON_TX_FAIL;
 use crate::rpc::rpc::Transaction;
 use crate::RpcConnection;
 use crate::rpc::format::*;
@@ -15,7 +16,7 @@ use crate::rpc::rpc::TransactionParams;
 // 6) Loop for all transactions in a block
 // 7) Set next block timestamp
 // 8) `evm_mine` the block
-
+//EXIT_ON_TX_FAIL
 async fn send_transactions(
     replay_rpc: RpcConnection,
     historical_txs: Vec<Transaction>,
@@ -36,7 +37,11 @@ async fn send_transactions(
         // Gracefully handle errors so execution doesnt halt on error
         match replay_rpc.send_unsigned_transaction(tx).await {
             Ok(_) => (),
-            Err(e) => println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e),
+            Err(e) => if unsafe { EXIT_ON_TX_FAIL } {
+                return Err(e.into());
+            } else {
+                println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+            }
         }
     }
 
