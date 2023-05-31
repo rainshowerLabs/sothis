@@ -1,6 +1,8 @@
 mod rpc;
 mod replay;
 
+use std::println;
+
 use clap::{Command, Arg};
 
 use crate::rpc::format::hex_to_decimal;
@@ -49,7 +51,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
     let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
-
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
     // this is shit but so is the clap crate
@@ -65,8 +66,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let block = format_number_input(&block);
 
     if mode == "historic" {
+        println!("Replaying in historic mode...");
         replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
     } else {
+        println!("Replaying in live mode...");
         unimplemented!();
     }
 
