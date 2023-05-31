@@ -84,6 +84,15 @@ pub struct RpcConnection {
     url: String,
 }
 
+impl Clone for RpcConnection {
+    fn clone(&self) -> Self {
+        RpcConnection {
+            client: self.client.clone(),
+            url: self.url.clone(),
+        }
+    }
+}
+
 #[allow(dead_code)]
 impl RpcConnection {
     // Create client and set url
@@ -131,9 +140,6 @@ impl RpcConnection {
             .json::<JsonRpcResponse>()
             .await?;
 
-        #[cfg(debug_assertions)] {
-            println!("{}", method);
-        }
         Ok(response.result.to_string())
     }
 

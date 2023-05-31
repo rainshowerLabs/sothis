@@ -1,3 +1,4 @@
+use crate::rpc::rpc::Transaction;
 use crate::RpcConnection;
 use crate::rpc::format::*;
 use crate::rpc::rpc::BlockResult;
@@ -15,7 +16,27 @@ use crate::rpc::rpc::TransactionParams;
 // 7) Set next block timestamp
 // 8) `evm_mine` the block
 
+async fn send_transactions(
+    replay_rpc: RpcConnection,
+    historical_txs: Vec<Transaction>,
+    historical_chainid: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    for tx in historical_txs {
+        let tx = TransactionParams {
+            from: tx.from,
+            to: tx.to,
+            value: tx.value,
+            gas: tx.gas,
+            gasPrice: tx.gasPrice,
+            data: tx.input,
+            nonce: tx.nonce,
+            chainId: Some(historical_chainid.clone())
+        };
 
+        replay_rpc.send_unsigned_transaction(tx).await?;
+    }
+    Ok(())
+}
 
 pub async fn replay_blocks(
     historic_rpc: RpcConnection,
@@ -53,21 +74,9 @@ pub async fn replay_blocks(
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
         let historical_txs = historical_block.transactions;
+        
         // send transactions to mempool
-        for tx in historical_txs {
-            let tx = TransactionParams {
-                from: tx.from,
-                to: tx.to,
-                value: tx.value,
-                gas: tx.gas,
-                gasPrice: tx.gasPrice,
-                data: tx.input,
-                nonce: tx.nonce,
-                chainId: Some(historical_chainid.clone()),
-            };
-
-            replay_rpc.send_unsigned_transaction(tx).await?;
-        }
+        send_transactions(replay_rpc.clone(), historical_txs, historical_chainid.clone()).await?;
 
         println!("{:?}", historical_block.timestamp);
 
