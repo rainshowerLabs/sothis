@@ -46,7 +46,7 @@ async fn send_transactions(
 pub async fn replay_blocks(
     historic_rpc: RpcConnection,
     replay_rpc: RpcConnection,
-    until: &str,
+    until: u64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // make sure that both rpcs have the same chainid to satisfy the replay thingy
     let historical_chainid = historic_rpc.chain_id().await?;
@@ -58,7 +58,7 @@ pub async fn replay_blocks(
 
     // get block mumber of replay node
     let replay_block = replay_rpc.block_number().await?;
-    if hex_to_decimal(&replay_block)? > hex_to_decimal(until)? {
+    if hex_to_decimal(&replay_block)? > until {
         return Err("Replay node block must be less than termination block".into());
     }
 
@@ -67,7 +67,7 @@ pub async fn replay_blocks(
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
-    while until != replay_block {
+    while until > hex_to_decimal(&replay_block)? {
         // we write a bit of illegible code
         let replay_block = replay_rpc.block_number().await?;
 
