@@ -34,25 +34,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .required(true)
             .help("HTTP JSON-RPC of the node we're replaying data to"))
+        .arg(Arg::new("mode")
+            .long("mode")
+            .short('m')
+            .num_args(1..)
+            .default_value("historic")
+            .help("Choose between live replay or historic"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(1..)
             .help("Exit the program if a transaction fails"))
-        .arg(Arg::new("live")
-            .long("live")
-            .short('l')
-            .conflicts_with("replay")
-            .help("Replays new blocks as they come"))
-        .arg(Arg::new("replay")
-            .long("replay")
-            .short('o')
-            .conflicts_with("live")
-            .help("Replays until a specified block"))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
     let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+
+    let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
     // this is shit but so is the clap crate
     let vals: bool = matches.get_one::<String>("exit_on_tx_fail").is_some();
@@ -66,7 +64,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let replay_rpc = RpcConnection::new(replay_rpc);
     let block = format_number_input(&block);
 
-    replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+    if mode == "historic" {
+        replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+    } else {
+        unimplemented!();
+    }
 
     Ok(())
 }
