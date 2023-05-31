@@ -3,6 +3,7 @@ use serde_json::{json, Value};
 use reqwest::Client;
 
 use super::format::format_hex;
+use super::error::*;
 
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
@@ -108,7 +109,7 @@ impl RpcConnection {
         &self,
         method: &str,
         params: Value,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
         if params.is_null() {
@@ -131,14 +132,20 @@ impl RpcConnection {
             println!("Sending request: {}", request.clone());
         }
 
-        let response = self
-            .client
-            .post(&self.url)
-            .json(&request)
-            .send()
-            .await?
-            .json::<JsonRpcResponse>()
-            .await?;
+        let response = match self.client.post(&self.url).json(&request).send().await {
+            Ok(response) => response,
+            Err(err) => return Err(RequestError::RequestFailed(err.to_string())),
+        };
+
+        let response: serde_json::Value = match response.json().await {
+            Ok(json) => json,
+            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
+        };
+
+        let response = match serde_json::from_value::<JsonRpcResponse>(response) {
+            Ok(rpc_response) => rpc_response,
+            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
+        };
 
         Ok(response.result.to_string())
     }
@@ -148,14 +155,14 @@ impl RpcConnection {
      */
 
     // Gets current block_number.
-    pub async fn block_number(&self) -> Result<String, reqwest::Error> {
+    pub async fn block_number(&self) -> Result<String, RequestError> {
         let number = self.send_request("eth_blockNumber", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
     // Gets current chain_id.
-    pub async fn chain_id(&self) -> Result<String, reqwest::Error> {
+    pub async fn chain_id(&self) -> Result<String, RequestError> {
         let number = self.send_request("eth_chainId", serde_json::Value::Null).await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
@@ -165,7 +172,7 @@ impl RpcConnection {
     pub async fn get_block_by_number(
         &self,
         block_number: String,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = json!([block_number, true]);
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
@@ -174,7 +181,7 @@ impl RpcConnection {
     pub async fn get_transaction_by_hash(
         &self,
         tx_hash: String,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = json!([tx_hash]);
         Ok(self.send_request("eth_getTransactionByHash", params).await?)
     }
@@ -183,7 +190,7 @@ impl RpcConnection {
     pub async fn send_transaction(
         &self,
         tx: TransactionParams,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
         Ok(self.send_request("eth_sendTransaction", params).await?)
     }
@@ -196,7 +203,7 @@ impl RpcConnection {
     pub async fn send_unsigned_transaction(
         &self,
         tx: TransactionParams,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
         Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
     }
@@ -205,13 +212,13 @@ impl RpcConnection {
     pub async fn evm_set_automine(
         &self,
         mode: bool,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = json!([mode]);
         Ok(self.send_request("evm_setAutomine", params).await?)
     }
 
     // Mines a block.
-    pub async fn evm_mine(&self) -> Result<String, reqwest::Error> {
+    pub async fn evm_mine(&self) -> Result<String, RequestError> {
         Ok(self.send_request("evm_mine", serde_json::Value::Null).await?)
     }
 
@@ -219,7 +226,7 @@ impl RpcConnection {
     pub async fn evm_set_interval_mining(
         &self,
         interval: u64,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = json!([interval]);
         Ok(self.send_request("evm_setIntervalMining", params).await?)
     }
@@ -228,7 +235,7 @@ impl RpcConnection {
     pub async fn evm_set_next_block_timestamp(
         &self,
         timestamp: u64,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String, RequestError> {
         let params = json!([timestamp]);
         Ok(self.send_request("evm_setNextBlockTimestamp", params).await?)
     }
