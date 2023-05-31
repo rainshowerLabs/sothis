@@ -43,7 +43,7 @@ async fn send_transactions(
     Ok(())
 }
 
-pub async fn replay_blocks(
+pub async fn replay_historic_blocks(
     source_rpc: RpcConnection,
     replay_rpc: RpcConnection,
     until: u64,

@@ -1,9 +1,10 @@
 mod rpc;
 mod replay;
 
+use clap::{arg, Command};
+
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
-use clap::{arg, Command};
 use rpc::rpc::RpcConnection;
 use crate::replay::*;
 
@@ -27,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let replay_rpc = RpcConnection::new(replay_rpc);
     let block = format_number_input(&block);
 
-    replay_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+    replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
 
     Ok(())
 }
