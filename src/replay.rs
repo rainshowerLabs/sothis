@@ -44,12 +44,12 @@ async fn send_transactions(
 }
 
 pub async fn replay_blocks(
-    historic_rpc: RpcConnection,
+    source_rpc: RpcConnection,
     replay_rpc: RpcConnection,
     until: u64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // make sure that both rpcs have the same chainid to satisfy the replay thingy
-    let historical_chainid = historic_rpc.chain_id().await?;
+    let historical_chainid = source_rpc.chain_id().await?;
     let replay_chainid = replay_rpc.chain_id().await?;
 
     if historical_chainid != replay_chainid {
@@ -71,7 +71,7 @@ pub async fn replay_blocks(
         // we write a bit of illegible code
         let hex_block = decimal_to_hex(replay_block + 1);
         // get block from historical node
-        let historical_block = historic_rpc.get_block_by_number(hex_block.clone()).await?;
+        let historical_block = source_rpc.get_block_by_number(hex_block.clone()).await?;
 
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
