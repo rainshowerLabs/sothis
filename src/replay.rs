@@ -33,8 +33,13 @@ async fn send_transactions(
             chainId: Some(historical_chainid.clone())
         };
 
-        replay_rpc.send_unsigned_transaction(tx).await?;
+        // Gracefully handle errors so execution doesnt halt on error
+        match replay_rpc.send_unsigned_transaction(tx).await {
+            Ok(_) => (),
+            Err(e) => println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e),
+        }
     }
+
     Ok(())
 }
 
@@ -69,16 +74,14 @@ pub async fn replay_blocks(
         let decimal = hex_to_decimal(&replay_block)?;
         let hex_block = decimal_to_hex(decimal + 1);
         // get block from historical node
-        let historical_block = historic_rpc.get_block_by_number(hex_block).await?;
+        let historical_block = historic_rpc.get_block_by_number(hex_block.clone()).await?;
 
         // get transaction hashes from block
         let historical_block: BlockResult = serde_json::from_str(&historical_block)?;
         let historical_txs = historical_block.transactions;
-        
+
         // send transactions to mempool
         send_transactions(replay_rpc.clone(), historical_txs, historical_chainid.clone()).await?;
-
-        println!("{:?}", historical_block.timestamp);
 
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
@@ -87,7 +90,7 @@ pub async fn replay_blocks(
 
         // mine the block
         replay_rpc.evm_mine().await?;
-        println!("Successfully replayed block {}", &replay_block);
+        println!("Successfully replayed block {}", hex_to_decimal(&hex_block)?);
     }
     println!("Done replaying blocks");
     Ok(())

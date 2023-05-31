@@ -128,9 +128,9 @@ impl RpcConnection {
             });
         }
 
-        #[cfg(debug_assertions)] {
-            println!("Sending request: {}", request.clone());
-        }
+        // #[cfg(debug_assertions)] {
+        //     println!("Sending request: {}", request.clone());
+        // }
 
         let response = match self.client.post(&self.url).json(&request).send().await {
             Ok(response) => response,
@@ -138,12 +138,12 @@ impl RpcConnection {
         };
 
         let response: serde_json::Value = match response.json().await {
-            Ok(json) => json,
+            Ok(response) => response,
             Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
         };
 
         let response = match serde_json::from_value::<JsonRpcResponse>(response) {
-            Ok(rpc_response) => rpc_response,
+            Ok(response) => response,
             Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
         };
 
