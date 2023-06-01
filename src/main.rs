@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Choose between live replay or historic"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
-            .num_args(1..)
+            .num_args(0..)
             .help("Exit the program if a transaction fails"))
         .get_matches();
 
@@ -55,19 +55,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // this is shit but so is the clap crate
     unsafe {
-        EXIT_ON_TX_FAIL = matches.get_one::<String>("exit_on_tx_fail").is_some();
+        EXIT_ON_TX_FAIL = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
     let block = format_number_input(&block);
+    
+    match mode.as_str() {
+        "historic" => {
+            println!("Replaying in historic mode...");
+            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+        },
+        "live" => {
+            println!("Replaying in live mode...");
+            unimplemented!();
+        }
+        &_ => {
+            // handle this properly later
+            panic!("Mode does not exist!");
+        },
 
-    if mode == "historic" {
-        println!("Replaying in historic mode...");
-        replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
-    } else {
-        println!("Replaying in live mode...");
-        unimplemented!();
     }
 
     Ok(())
