@@ -3,16 +3,7 @@ use crate::RpcConnection;
 use crate::rpc::format::*;
 use crate::rpc::types::*;
 
-// To replay blocks we:
-// 1) Make sure that the replay rpc block is equal to `block`
-// 2) Set the `evm_autoMine` mode to create blocks
-// 3) Set the `evm_set_interval_mining` to something ridiculously high.
-// 4) Get transaction hashes from block
-// 5) Get transactions from hashes, `eth_sendTransaction` that to the mempool
-// 6) Loop for all transactions in a block
-// 7) Set next block timestamp
-// 8) `evm_mine` the block
-//EXIT_ON_TX_FAIL
+// Generic function we use to replay all tx in a block
 async fn send_transactions(
     replay_rpc: RpcConnection,
     historical_txs: Vec<Transaction>,
@@ -44,6 +35,15 @@ async fn send_transactions(
     Ok(())
 }
 
+// To replay historic blocks we:
+// 0) Make sure that the chainids match
+// 1) Set the `evm_autoMine` mode to create blocks
+// 2) Set the `evm_set_interval_mining` to something ridiculously high.
+// 3) Get transaction hashes from block
+// 4) Get transactions from hashes, `eth_sendTransaction` that to the mempool
+// 5) Loop for all transactions in a block
+// 6) Set next block timestamp
+// 7) `evm_mine` the block
 pub async fn replay_historic_blocks(
     source_rpc: RpcConnection,
     replay_rpc: RpcConnection,
@@ -94,4 +94,21 @@ pub async fn replay_historic_blocks(
     }
     println!("Done replaying blocks");
     Ok(())
+}
+
+// To replay live blocks we:
+// 0) Assume that we are lagging behind the head.
+// 1) Catch up to the head block by using `replay_historic_blocks`. 
+// 2) Once we caught up, listen for new blocks.
+// 3) Repeat from 2.
+#[allow(dead_code, unused_variables)]
+pub async fn replay_live(
+    replay_rpc: RpcConnection,
+    source_rpc: RpcConnection,
+    historical_txs: Vec<Transaction>,
+    historical_chainid: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    loop {
+        let latest_block = source_rpc.listen_for_blocks().await?;
+    }
 }

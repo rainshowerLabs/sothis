@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use super::format::format_hex;
 use super::error::*;
@@ -180,5 +182,46 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         let params = json!([timestamp]);
         Ok(self.send_request("evm_setNextBlockTimestamp", params).await?)
+    }
+
+    /* 
+     * Subscriptions
+     */
+
+    // Listen for new blocks, return latest blocknumber on new block.
+    pub async fn listen_for_blocks(&self) -> Result<u64, RequestError> {
+        let latest_block_number = Arc::new(Mutex::new(0u64));
+        loop {
+            // Send an eth_blockNumber JSON-RPC request to get the latest block number
+            let response = self.client
+                .post(self.url.clone())
+                .json(&json!({
+                    "jsonrpc": "2.0",
+                    "method": "eth_blockNumber",
+                    "params": [],
+                    "id": 1
+                }))
+                .send()
+                .await
+                .unwrap();
+
+            // Parse the JSON response
+            let response_json: serde_json::Value = response.json().await.unwrap();
+
+            // Extract the latest block number from the response
+            let block_number_hex = response_json["result"].as_str().unwrap();
+            let block_number = u64::from_str_radix(block_number_hex.trim_start_matches("0x"), 16).unwrap();
+
+            // Check if the latest block number has changed
+            let mut latest_block_number = latest_block_number.lock().await;
+            if block_number != *latest_block_number {
+                // Update the latest block number in the shared state
+                *latest_block_number = block_number;
+                return Ok(0u64);
+            }
+
+            // Delay for a certain period before checking the latest block number again
+            tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+        }
     }
 }
