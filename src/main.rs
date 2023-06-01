@@ -54,11 +54,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
     // this is shit but so is the clap crate
-    let vals: bool = matches.get_one::<String>("exit_on_tx_fail").is_some();
-    if vals == true {
-        unsafe {
-            EXIT_ON_TX_FAIL = true;
-        }
+    unsafe {
+        EXIT_ON_TX_FAIL = matches.get_one::<String>("exit_on_tx_fail").is_some();
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
