@@ -1,11 +1,7 @@
 use crate::EXIT_ON_TX_FAIL;
-use crate::rpc::rpc::Transaction;
 use crate::RpcConnection;
 use crate::rpc::format::*;
-use crate::rpc::rpc::BlockResult;
-use crate::rpc::rpc::TransactionParams;
-//use crate::rpc::rpc::Transaction;
-
+use crate::rpc::types::*;
 
 // To replay blocks we:
 // 1) Make sure that the replay rpc block is equal to `block`

@@ -4,6 +4,7 @@ use reqwest::Client;
 
 use super::format::format_hex;
 use super::error::*;
+use super::types::*;
 
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
@@ -19,65 +20,6 @@ struct JsonRpcResponse {
     jsonrpc: String,
     result: Value,
     id: u32,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[allow(dead_code, non_snake_case)]
-pub struct BlockResult {
-    difficulty: String,
-    extraData: String,
-    gasLimit: String,
-    gasUsed: String,
-    hash: String,
-    logsBloom: String,
-    miner: String,
-    mixHash: String,
-    nonce: String,
-    number: String,
-    parentHash: String,
-    receiptsRoot: String,
-    sha3Uncles: String,
-    size: String,
-    stateRoot: String,
-    pub timestamp: String,
-    totalDifficulty: String,
-    pub transactions: Vec<Transaction>,
-    transactionsRoot: String,
-    uncles: Vec<String>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[allow(dead_code, non_snake_case)]
-pub struct Transaction {
-    blockHash: String,
-    blockNumber: String,
-    pub from: String,
-    pub gas: String,
-    pub gasPrice: String,
-    pub hash: String,
-    pub input: String,
-    pub nonce: String,
-    r: String,
-    s: String,
-    pub to: Option<String>,
-    transactionIndex: String,
-    #[serde(rename = "type")]
-    txType: String,
-    v: String,
-    pub value: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[allow(non_snake_case)]
-pub struct TransactionParams {
-    pub from: String,
-    pub to: Option<String>,
-    pub value: String,
-    pub gas: String,
-    pub gasPrice: String,
-    pub data: String,
-    pub nonce: String,
-    pub chainId: Option<String>,
 }
 
 pub struct RpcConnection {

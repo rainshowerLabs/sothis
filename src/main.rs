@@ -1,8 +1,6 @@
 mod rpc;
 mod replay;
 
-use std::println;
-
 use clap::{Command, Arg};
 
 use crate::rpc::format::hex_to_decimal;
@@ -10,6 +8,8 @@ use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
 use crate::replay::*;
 
+// I dont feel like passing this around as a functiona argument
+// so we do a little bit of unsafe rust.
 static mut EXIT_ON_TX_FAIL: bool = false;
 
 #[tokio::main]
@@ -75,7 +75,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // handle this properly later
             panic!("Mode does not exist!");
         },
-
     }
 
     Ok(())
