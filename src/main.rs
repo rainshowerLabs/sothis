@@ -28,7 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("terminal_block")
             .short('b')
             .num_args(1..)
-            .required(true)
             .help("Block we're replaying until"))
         .arg(Arg::new("replay_rpc")
             .long("replay_rpc")
@@ -49,7 +48,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
-    let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
@@ -60,22 +58,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let source_rpc = RpcConnection::new(source_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
-    let block = format_number_input(&block);
     
     match mode.as_str() {
         "historic" => {
             println!("Replaying in historic mode...");
+            
+            let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let block = format_number_input(&block);
+
             replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
         },
         "live" => {
-            println!("Replaying in live mode...");
-            unimplemented!();
+            println!("Replaying live blocks...");
+            replay_live(replay_rpc, source_rpc).await?;
         }
         &_ => {
             // handle this properly later
             panic!("Mode does not exist!");
         },
     }
-
+    
     Ok(())
 }

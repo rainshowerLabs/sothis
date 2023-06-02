@@ -105,10 +105,13 @@ pub async fn replay_historic_blocks(
 pub async fn replay_live(
     replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
-    historical_txs: Vec<Transaction>,
-    historical_chainid: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     loop {
+        // Get new head every 1s
         let latest_block = source_rpc.listen_for_blocks().await?;
+        if latest_block != replay_rpc.block_number().await? {
+            println!("New block detected, replaying...");
+            replay_historic_blocks(source_rpc.clone(), replay_rpc.clone(), hex_to_decimal(&latest_block)?).await?;
+        }
     }
 }
