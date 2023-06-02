@@ -2,7 +2,7 @@
 
 # `sothis`
 
-Sothis is a tool for replaying historical state on a local testnet node. ***Sothis uses anvil specific RPC calls and does not work on regular networks***
+Sothis is a tool for replaying historical state on a local ***anvil/hardhat(soon)*** testnet node. 
 
 ## Usage
 
@@ -46,7 +46,17 @@ sothis --source_rpc {ARCHIVE_NODE} --replay_rpc http://localhost:8545 -m live
 Sothis is a rust crate. You can install it with cargo:
 `cargo install sothis`
 
-## Why the name?
+## FAQ
+
+###  Why is sothis so slow?
+
+Its most likely your RPC provider/s. If using `anvil` make sure you add the `--cups {REALL_HIGH_VALUE}` arg so it doesnt get throttled.
+
+### I have a problem with sothis. Can devs do something?
+
+Yes! Make a github issue detailing your problem.
+
+### Why the name?
 
 Sothis is known as the creator and God of Fódlan in Fire Emblem: Thee Houses. She has the ability to rewind time at will.
 
