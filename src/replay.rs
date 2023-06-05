@@ -3,12 +3,15 @@ use crate::RpcConnection;
 use crate::rpc::format::*;
 use crate::rpc::types::*;
 
-// Generic function we use to replay all tx in a block
+// Generic function we use to replay all tx in a block.
 async fn send_transactions(
     replay_rpc: RpcConnection,
     historical_txs: Vec<Transaction>,
     historical_chainid: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let app_config = APP_CONFIG.lock()?;
+    let mut success_tx_amount: f32 = 0.0;
+    let mut fail_tx_amount: f32 = 0.0;
     for tx in historical_txs {
         let tx = TransactionParams {
             from: tx.from,
@@ -21,19 +24,26 @@ async fn send_transactions(
             chainId: Some(historical_chainid.clone())
         };
 
-        // Gracefully handle errors so execution doesnt halt on error
+        // Gracefully handle errors so execution doesn't halt on error
         match replay_rpc.send_unsigned_transaction(tx).await {
-            Ok(_) => (),
-            Err(e) => if APP_CONFIG.lock().unwrap().exit_on_tx_fail {
+            Ok(_) => success_tx_amount += 1.0,
+            Err(e) => if app_config.exit_on_tx_fail {
                 return Err(e.into());
             } else {
+                fail_tx_amount += 1.0;
                 println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
             }
+        }
+
+        let fail_ratio = fail_tx_amount / success_tx_amount;
+        if fail_ratio > 0.07 {
+            println!("!!! \x1b[93mHigh entropy detected! Fail ratio:\x1b[0m {}. Consider restarting the fork !!!", fail_ratio);
         }
     }
 
     Ok(())
 }
+
 
 // To replay historic blocks we:
 // 0) Make sure that the chainids match
@@ -84,7 +94,7 @@ pub async fn replay_historic_blocks(
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
             hex_to_decimal(&historical_block.timestamp)?
-        ).await?;
+            ).await?;
 
         // mine the block
         replay_rpc.evm_mine().await?;
@@ -105,7 +115,7 @@ pub async fn replay_historic_blocks(
 pub async fn replay_live(
     replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
-) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         // Get new head every 1s
         let latest_block = source_rpc.listen_for_blocks().await?;

@@ -12,10 +12,8 @@ use crate::replay::*;
 
 // Settings flags
 #[derive(Default)]
-#[allow(dead_code)]
 pub struct AppConfig {
     exit_on_tx_fail: bool,
-    is_hardhat: bool,
 }
 
 lazy_static! {
@@ -51,12 +49,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .default_value("historic")
             .help("Choose between live replay or historic"))
-        .arg(Arg::new("replay_node_type")
-            .long("replay_node_type")
-            .short('t')
-            .num_args(1..)
-            .default_value("anvil")
-            .help("Choose between hardhat or anvil"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(0..)
@@ -68,8 +60,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
     // Set settings
-    let mut app_config = APP_CONFIG.lock().unwrap();
-    app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
+    {
+        let mut app_config = APP_CONFIG.lock()?;
+        app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
+    }
 
     let source_rpc = RpcConnection::new(source_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);
