@@ -240,4 +240,18 @@ impl RpcConnection {
 
         Ok(new_blocknumber)
     }
+
+    /* 
+     * Helper functions
+     */
+
+    // This just kinda abstracts the check of if its hardhat.
+    pub async fn is_hardhat(&self) -> bool {
+        // call hardhat_get_automine and if we get a response, assume we are on hardhat
+        match self.hardhat_get_automine().await {
+            Ok(_) => return true,
+            Err(_) => return false,
+        };
+    }
+
 }
