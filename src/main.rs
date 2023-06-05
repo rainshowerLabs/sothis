@@ -2,15 +2,24 @@ mod rpc;
 mod replay;
 
 use clap::{Command, Arg};
+use std::sync::Mutex;
+use lazy_static::lazy_static;
 
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
 use crate::replay::*;
 
-// I dont feel like passing this around as a functiona argument
-// so we do a little bit of unsafe rust.
-static mut EXIT_ON_TX_FAIL: bool = false;
+// Settings flags
+
+#[derive(Default)]
+pub struct AppConfig {
+    pub exit_on_tx_fail: bool,
+}
+
+lazy_static! {
+    static ref APP_CONFIG: Mutex<AppConfig> = Mutex::new(AppConfig::default());
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,6 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .default_value("historic")
             .help("Choose between live replay or historic"))
+        .arg(Arg::new("replay_node_type")
+            .long("replay_node_type")
+            .short('t')
+            .num_args(1..)
+            .default_value("anvil")
+            .help("Choose between hardhat or anvil"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(0..)
@@ -51,10 +66,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
-    // this is shit but so is the clap crate
-    unsafe {
-        EXIT_ON_TX_FAIL = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
-    }
+    let mut app_config = APP_CONFIG.lock().unwrap();
+    app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
 
     let source_rpc = RpcConnection::new(source_rpc);
     let replay_rpc = RpcConnection::new(replay_rpc);

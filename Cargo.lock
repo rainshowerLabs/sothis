@@ -878,6 +878,7 @@ dependencies = [
  "async-trait",
  "clap",
  "env",
+ "lazy_static",
  "reqwest",
  "rlp",
  "serde",

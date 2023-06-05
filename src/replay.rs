@@ -1,4 +1,4 @@
-use crate::EXIT_ON_TX_FAIL;
+use crate::APP_CONFIG;
 use crate::RpcConnection;
 use crate::rpc::format::*;
 use crate::rpc::types::*;
@@ -24,7 +24,7 @@ async fn send_transactions(
         // Gracefully handle errors so execution doesnt halt on error
         match replay_rpc.send_unsigned_transaction(tx).await {
             Ok(_) => (),
-            Err(e) => if unsafe { EXIT_ON_TX_FAIL } {
+            Err(e) => if APP_CONFIG.lock().unwrap().exit_on_tx_fail {
                 return Err(e.into());
             } else {
                 println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
