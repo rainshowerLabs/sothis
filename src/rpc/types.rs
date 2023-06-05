@@ -28,21 +28,21 @@ pub struct BlockResult {
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
 pub struct Transaction {
-    blockHash: String,
-    blockNumber: String,
+    pub blockHash: String,
+    pub blockNumber: String,
     pub from: String,
     pub gas: String,
     pub gasPrice: String,
     pub hash: String,
     pub input: String,
     pub nonce: String,
-    r: String,
-    s: String,
+    pub r: String,
+    pub s: String,
     pub to: Option<String>,
-    transactionIndex: String,
+    pub transactionIndex: String,
     #[serde(rename = "type")]
-    txType: String,
-    v: String,
+    pub txType: String,
+    pub v: String,
     pub value: String,
 }
 

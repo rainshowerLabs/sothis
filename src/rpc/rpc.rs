@@ -4,6 +4,7 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
+use rlp::RlpStream;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -132,13 +133,42 @@ impl RpcConnection {
         Ok(self.send_request("eth_getTransactionByHash", params).await?)
     }
 
-    // Send transaction
-    pub async fn send_transaction(
+    // Sends raw transaction
+    pub async fn send_raw_transaction(
         &self,
-        tx: TransactionParams,
+        tx: Transaction,
     ) -> Result<String, RequestError> {
-        let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
-        Ok(self.send_request("eth_sendTransaction", params).await?)
+        // To have this work, we need to RLP encode tx params.
+        // 0) `nonce`
+        // 1) `gas_price`
+        // 2) `gas_limit`
+        // 3) `to`
+        // 4) `value`
+        // 5) `data`
+        // 6) `v`
+        // 7) `r`
+        // 8) `s`
+
+        let mut stream = RlpStream::new();
+        stream.begin_unbounded_list();
+        stream
+            .append(&hex_to_decimal(&tx.nonce)?)
+            .append(&hex_to_decimal(&tx.gasPrice)?)
+            .append(&hex_to_decimal(&tx.gas)?)
+            .append(&tx.to)
+            .append(&hex_to_decimal(&tx.value)?)
+            .append(&tx.value)
+            .append(&tx.v)
+            .append(&tx.r)
+            .append(&tx.s)
+        .finalize_unbounded_list();
+
+        let stream = stream.out();
+        let params = json!(*stream);
+
+        println!("params: {:#?}", params);
+
+        Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }
 
     /* 
@@ -184,6 +214,11 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         let params = json!([timestamp]);
         Ok(self.send_request("evm_setNextBlockTimestamp", params).await?)
+    }
+    
+    // Gets hardhat mining mode. We use this to check if our node is HH or anvil.
+    pub async fn hardhat_get_automine(&self) -> Result<String, RequestError> {
+        Ok(self.send_request("hardhat_getAutomine", serde_json::Value::Null).await?)
     }
 
     /* 
