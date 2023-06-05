@@ -11,10 +11,11 @@ use rpc::rpc::RpcConnection;
 use crate::replay::*;
 
 // Settings flags
-
 #[derive(Default)]
+#[allow(dead_code)]
 pub struct AppConfig {
-    pub exit_on_tx_fail: bool,
+    exit_on_tx_fail: bool,
+    is_hardhat: bool,
 }
 
 lazy_static! {
@@ -66,6 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
+    // Set settings
     let mut app_config = APP_CONFIG.lock().unwrap();
     app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
 
