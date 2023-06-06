@@ -1,7 +1,6 @@
 use std::{fmt, num::ParseIntError};
 
 #[derive(Debug)]
-#[allow(dead_code)]
 pub enum RequestError {
     RequestFailed(String),
     JsonDeserializationFailed(String),

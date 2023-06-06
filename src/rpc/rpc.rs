@@ -87,7 +87,7 @@ impl RpcConnection {
 
         let response: serde_json::Value = match response.json().await {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
+            Err(err) => return Err(RequestError::JsonSerializationFailed(err.to_string())),
         };
 
         let response = match serde_json::from_value::<JsonRpcResponse>(response) {
