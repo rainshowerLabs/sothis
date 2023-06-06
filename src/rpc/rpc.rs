@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
 use rlp::RlpStream;
+use hex;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -157,18 +158,18 @@ impl RpcConnection {
             .append(&hex_to_decimal(&tx.gas)?)
             .append(&tx.to)
             .append(&hex_to_decimal(&tx.value)?)
-            .append(&tx.value)
+            .append(&tx.input)
             .append(&tx.v)
             .append(&tx.r)
             .append(&tx.s)
         .finalize_unbounded_list();
 
-        let stream = stream.out();
-        let params = json!(*stream);
+        let stream = stream.out().to_vec();
+        let stream = json!([format!("0x{}", hex::encode(stream))]);
 
-        println!("params: {:#?}", params);
+        println!("params: {:#?}", stream);
 
-        Ok(self.send_request("eth_sendRawTransaction", params).await?)
+        Ok(self.send_request("eth_sendRawTransaction", stream).await?)
     }
 
     /* 
