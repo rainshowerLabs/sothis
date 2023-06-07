@@ -4,7 +4,7 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
-use hex;
+use rlp::RlpStream;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -86,7 +86,7 @@ impl RpcConnection {
 
         let response: serde_json::Value = match response.json().await {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::JsonSerializationFailed(err.to_string())),
+            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
         };
 
         let response = match serde_json::from_value::<JsonRpcResponse>(response) {
@@ -138,14 +138,37 @@ impl RpcConnection {
         &self,
         tx: Transaction,
     ) -> Result<String, RequestError> {
-        
-        let mut encoded = rlp::encode(&tx);
-        // convert to str
-        encoded.make_ascii_lowercase();
-        println!("{:?}", encoded);
-        // encoded is BytesMut so we need to convert to str
+        // To have this work, we need to RLP encode tx params.
+        // 0) `nonce`
+        // 1) `gas_price`
+        // 2) `gas_limit`
+        // 3) `to`
+        // 4) `value`
+        // 5) `data`
+        // 6) `v`
+        // 7) `r`
+        // 8) `s`
 
-        Ok(self.send_request("eth_sendRawTransaction", serde_json::Value::Null).await?)
+        let mut stream = RlpStream::new();
+        stream.begin_unbounded_list();
+        stream
+            .append(&hex_to_decimal(&tx.nonce)?)
+            .append(&hex_to_decimal(&tx.gasPrice)?)
+            .append(&hex_to_decimal(&tx.gas)?)
+            .append(&tx.to)
+            .append(&hex_to_decimal(&tx.value)?)
+            .append(&tx.value)
+            .append(&tx.v)
+            .append(&tx.r)
+            .append(&tx.s)
+        .finalize_unbounded_list();
+
+        let stream = stream.out();
+        let params = json!(*stream);
+
+        println!("params: {:#?}", params);
+
+        Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }
 
     /* 
