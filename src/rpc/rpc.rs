@@ -142,12 +142,10 @@ impl RpcConnection {
         let mut encoded = rlp::encode(&tx);
         // convert to str
         encoded.make_ascii_lowercase();
-        // aksdbabdiua oia;lsdhj;asudjaksjlj;iasdaois;djaio;sdhs;d
-        let mut encoded = hex::encode(encoded);
-        encoded = format!("0x{}", encoded);
         println!("{:?}", encoded);
-        
-        Ok(self.send_request("eth_sendRawTransaction", serde_json::Value::String(encoded)).await?)
+        // encoded is BytesMut so we need to convert to str
+
+        Ok(self.send_request("eth_sendRawTransaction", serde_json::Value::Null).await?)
     }
 
     /* 

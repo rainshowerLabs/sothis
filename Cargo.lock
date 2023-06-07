@@ -2846,6 +2846,7 @@ dependencies = [
  "hex",
  "lazy_static",
  "reqwest",
+ "rlp",
  "serde",
  "serde_json",
  "tokio",
