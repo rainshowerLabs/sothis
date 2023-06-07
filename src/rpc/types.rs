@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use ethers::core::utils::rlp::*;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
@@ -44,6 +45,31 @@ pub struct Transaction {
     pub txType: String,
     pub v: String,
     pub value: String,
+}
+
+impl rlp::Encodable for Transaction {
+    fn rlp_append(&self, s: &mut RlpStream) {
+        // 0) `nonce`
+        // 1) `gas_price`
+        // 2) `gas_limit`
+        // 3) `to`
+        // 4) `value`
+        // 5) `data`
+        // 6) `v`
+        // 7) `r`
+        // 8) `s`
+
+        s.begin_list(9)
+            .append(&self.nonce)
+            .append(&self.gasPrice)
+            .append(&self.gas)
+            .append(&self.to)
+            .append(&self.value)
+            .append(&self.input)
+            .append(&self.v)
+            .append(&self.r)
+            .append(&self.s);
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

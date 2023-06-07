@@ -4,7 +4,6 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
-use rlp::RlpStream;
 use hex;
 
 use crate::hex_to_decimal;
@@ -139,37 +138,16 @@ impl RpcConnection {
         &self,
         tx: Transaction,
     ) -> Result<String, RequestError> {
-        // To have this work, we need to RLP encode tx params.
-        // 0) `nonce`
-        // 1) `gas_price`
-        // 2) `gas_limit`
-        // 3) `to`
-        // 4) `value`
-        // 5) `data`
-        // 6) `v`
-        // 7) `r`
-        // 8) `s`
-
-        let mut stream = RlpStream::new();
-        stream.begin_unbounded_list();
-        stream
-            .append(&hex_to_decimal(&tx.nonce)?)
-            .append(&hex_to_decimal(&tx.gasPrice)?)
-            .append(&hex_to_decimal(&tx.gas)?)
-            .append(&tx.to)
-            .append(&hex_to_decimal(&tx.value)?)
-            .append(&tx.input)
-            .append(&tx.v)
-            .append(&tx.r)
-            .append(&tx.s)
-        .finalize_unbounded_list();
-
-        let stream = stream.out().to_vec();
-        let stream = json!([format!("0x{}", hex::encode(stream))]);
-
-        println!("params: {:#?}", stream);
-
-        Ok(self.send_request("eth_sendRawTransaction", stream).await?)
+        
+        let mut encoded = rlp::encode(&tx);
+        // convert to str
+        encoded.make_ascii_lowercase();
+        // aksdbabdiua oia;lsdhj;asudjaksjlj;iasdaois;djaio;sdhs;d
+        let mut encoded = hex::encode(encoded);
+        encoded = format!("0x{}", encoded);
+        println!("{:?}", encoded);
+        
+        Ok(self.send_request("eth_sendRawTransaction", serde_json::Value::String(encoded)).await?)
     }
 
     /* 
