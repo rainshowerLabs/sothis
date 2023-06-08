@@ -85,6 +85,7 @@ impl Transaction {
 
         let gas: U256 = Cow::Borrowed(&self.gas).parse()?;
         self.typed_tx.set_gas(gas);
+        
         self.typed_tx.set_chain_id(chain_id);
         // We need to convert `self.input` to Bytes first to set the data
         let input = hex::decode(self.input.as_str())?;
