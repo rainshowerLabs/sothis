@@ -140,7 +140,6 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         let mut tx = tx.clone();
         let params = tx.rlp_serialize_tx(chain_id)?;
-        println!("kandkjasbdjkasbdkjasb: {}", params);
         let params = json!([params]);
 
         Ok(self.send_request("eth_sendRawTransaction", params).await?)

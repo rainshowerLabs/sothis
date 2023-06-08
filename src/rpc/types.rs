@@ -72,7 +72,7 @@ impl Transaction {
         // 7) `r`
         // 8) `s`
 
-        // This way of dealing with the borrow checker is bad byt fuck it we ball
+        // This way of dealing with the borrow checker is probably not good but fuck it we ball
         let mut typed_tx: TypedTransaction = Default::default();
 
         // If to doesnt contain a value, have it be `""`
@@ -121,9 +121,7 @@ impl Transaction {
             v, // as U64
         };
 
-        println!("abdihasbdhiasbdhabuhabvsudyibav");
         let encoded = typed_tx.rlp_signed(&sig);
-        println!("hhhhhhhh");
         println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(hex::encode(encoded))
     }
