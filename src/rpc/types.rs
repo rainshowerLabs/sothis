@@ -1,11 +1,14 @@
 use serde::{Deserialize, Serialize};
 use ethers::utils::hex;
 
+use std::str::FromStr;
+use std::borrow::Cow;
+
 use ethers::types::transaction::eip2718::TypedTransaction;
 use ethers::types::Signature;
 use ethers::types::U256;
 
-use std::borrow::Cow;
+use crate::hex_to_decimal;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
@@ -68,10 +71,10 @@ impl Transaction {
         // 6) `v`
         // 7) `r`
         // 8) `s`
-        println!("HI");
+
         // This way of dealing with the borrow checker is bad byt fuck it we ball
         let mut typed_tx: TypedTransaction = Default::default();
-        println!("jjjjjjjjjjjjjjjj");
+
         // If to doesnt contain a value, have it be `""`
         let to: String;
         to = match self.to {
@@ -82,7 +85,6 @@ impl Transaction {
         };
 
         typed_tx.set_to(to);
-        println!("adiasdiad");
 
         let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
         typed_tx.set_nonce(nonce);
@@ -97,15 +99,20 @@ impl Transaction {
         typed_tx.set_gas(gas);
 
         typed_tx.set_chain_id(chain_id);
+
         // We need to convert `self.input` to Bytes first to set the data
-        let input = hex::decode(self.input.as_str())?;
+
+        // Remove 0x prefix from input if present
+        let input = self.input.trim_start_matches("0x");
+
+        let input = hex::decode(input)?;
         typed_tx.set_data(input.into());
 
         // convert r and s to U256
         // convert v to U64
-        let r: U256 = self.r.parse()?;
-        let s: U256 = self.s.parse()?;
-        let v: u64 = self.v.parse()?;
+        let r: U256 = U256::from_str(&self.r)?;
+        let s: U256 = U256::from_str(&self.s)?;
+        let v: u64 = hex_to_decimal(&self.v)?;
 
         // create a new use ethers::types::Signature with the r, s, and v values
         let sig: Signature = Signature {
