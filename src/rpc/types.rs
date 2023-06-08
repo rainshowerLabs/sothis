@@ -68,18 +68,26 @@ impl Transaction {
         // 6) `v`
         // 7) `r`
         // 8) `s`
-
+        println!("HI");
         // This way of dealing with the borrow checker is bad byt fuck it we ball
         let mut typed_tx: TypedTransaction = Default::default();
+        println!("jjjjjjjjjjjjjjjj");
+        // If to doesnt contain a value, have it be `""`
+        let to: String;
+        to = match self.to {
+            Some(_) => {
+                self.to.clone().expect("REASON")
+            },
+            None => "".to_string(),
+        };
 
-
-        typed_tx.set_to(self.to.clone().expect("REASON").as_str());
-        println!("{:?}", self.to.clone().expect("REASON").as_str());
+        typed_tx.set_to(to);
+        println!("adiasdiad");
 
         let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
         typed_tx.set_nonce(nonce);
 
-        let value: U256 = Cow::Borrowed(self.value.as_str()).parse()?;
+        let value: U256 = Cow::Borrowed(&self.value.as_str()).parse()?;
         typed_tx.set_value(value);
 
         let gas_price: U256 = Cow::Borrowed(&self.gasPrice).parse()?;
@@ -106,7 +114,9 @@ impl Transaction {
             v, // as U64
         };
 
+        println!("abdihasbdhiasbdhabuhabvsudyibav");
         let encoded = typed_tx.rlp_signed(&sig);
+        println!("hhhhhhhh");
         println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(hex::encode(encoded))
     }
