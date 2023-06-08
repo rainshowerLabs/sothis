@@ -51,7 +51,6 @@ pub struct Transaction {
     pub txType: String,
     pub v: String,
     pub value: String,
-    pub typed_tx: TypedTransaction,
 }
 
 impl Transaction {
@@ -71,25 +70,28 @@ impl Transaction {
         // 8) `s`
 
         // This way of dealing with the borrow checker is bad byt fuck it we ball
+        let mut typed_tx: TypedTransaction = Default::default();
 
-        self.typed_tx.set_to(self.to.clone().expect("REASON").as_str());
+
+        typed_tx.set_to(self.to.clone().expect("REASON").as_str());
+        println!("{:?}", self.to.clone().expect("REASON").as_str());
 
         let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
-        self.typed_tx.set_nonce(nonce);
+        typed_tx.set_nonce(nonce);
 
         let value: U256 = Cow::Borrowed(self.value.as_str()).parse()?;
-        self.typed_tx.set_value(value);
+        typed_tx.set_value(value);
 
         let gas_price: U256 = Cow::Borrowed(&self.gasPrice).parse()?;
-        self.typed_tx.set_gas_price(gas_price);
+        typed_tx.set_gas_price(gas_price);
 
         let gas: U256 = Cow::Borrowed(&self.gas).parse()?;
-        self.typed_tx.set_gas(gas);
-        
-        self.typed_tx.set_chain_id(chain_id);
+        typed_tx.set_gas(gas);
+
+        typed_tx.set_chain_id(chain_id);
         // We need to convert `self.input` to Bytes first to set the data
         let input = hex::decode(self.input.as_str())?;
-        self.typed_tx.set_data(input.into());
+        typed_tx.set_data(input.into());
 
         // convert r and s to U256
         // convert v to U64
@@ -104,7 +106,8 @@ impl Transaction {
             v, // as U64
         };
 
-        let encoded = self.typed_tx.rlp_signed(&sig);
+        let encoded = typed_tx.rlp_signed(&sig);
+        println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(hex::encode(encoded))
     }
 }

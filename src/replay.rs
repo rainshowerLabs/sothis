@@ -80,7 +80,7 @@ pub async fn replay_historic_blocks(
         let historical_txs = historical_block.transactions;
 
         // send transactions to mempool
-        send_transactions(replay_rpc.clone(), historical_txs, replay_chainid.parse()?).await?;
+        send_transactions(replay_rpc.clone(), historical_txs, hex_to_decimal(&replay_chainid)?).await?;
 
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
