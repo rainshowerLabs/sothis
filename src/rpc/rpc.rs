@@ -80,7 +80,7 @@ impl RpcConnection {
 
         let response = match self.client.post(&self.url).json(&request).send().await {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::RequestFailed(err.to_string())),
+            Err(err) => return Err(RequestError::JsonSerializationFailed(err.to_string())),
         };
 
         let response: serde_json::Value = match response.json().await {
@@ -138,6 +138,7 @@ impl RpcConnection {
         tx: Transaction,
         chain_id: u64,
     ) -> Result<String, RequestError> {
+        let mut tx = tx.clone();
         let params = tx.rlp_serialize_tx(chain_id)?;
         let params = json!([params]);
 

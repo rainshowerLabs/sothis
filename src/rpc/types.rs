@@ -5,6 +5,7 @@ use ethers::types::transaction::eip2718::TypedTransaction;
 use ethers::types::Signature;
 use ethers::types::U256;
 
+use std::borrow::Cow;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
@@ -31,7 +32,7 @@ pub struct BlockResult {
     uncles: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
 pub struct Transaction {
     pub blockHash: String,
@@ -55,9 +56,9 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn rlp_serialize_tx(
-        &self,
+        &mut self,
         chain_id: u64,
-        ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> Result<String, Box<dyn std::error::Error>> {
         // To have this work, we need to RLP encode tx params.
         // 0) `nonce`
         // 1) `gas_price`
@@ -69,13 +70,23 @@ impl Transaction {
         // 7) `r`
         // 8) `s`
 
-        self.typed_tx.set_to(self.to.as_ref().unwrap());
-        self.typed_tx.set_nonce(self.nonce.as_str());
-        self.typed_tx.set_value(self.value.as_str());
-        self.typed_tx.set_gas_price(self.gasPrice.as_str());
-        self.typed_tx.set_gas(self.gas.as_str());
+        // This way of dealing with the borrow checker is bad byt fuck it we ball
+
+        self.typed_tx.set_to(self.to.clone().expect("REASON").as_str());
+
+        let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
+        self.typed_tx.set_nonce(nonce);
+
+        let value: U256 = Cow::Borrowed(self.value.as_str()).parse()?;
+        self.typed_tx.set_value(value);
+
+        let gas_price: U256 = Cow::Borrowed(&self.gasPrice).parse()?;
+        self.typed_tx.set_gas_price(gas_price);
+
+        let gas: U256 = Cow::Borrowed(&self.gas).parse()?;
+        self.typed_tx.set_gas(gas);
         self.typed_tx.set_chain_id(chain_id);
-        //  We need to convert `self.input` to Bytes firts to set the data
+        // We need to convert `self.input` to Bytes first to set the data
         let input = hex::decode(self.input.as_str())?;
         self.typed_tx.set_data(input.into());
 
@@ -85,8 +96,7 @@ impl Transaction {
         let s: U256 = self.s.parse()?;
         let v: u64 = self.v.parse()?;
 
-        // create a new use ethers::types::Signature with the
-        // r, s and v values
+        // create a new use ethers::types::Signature with the r, s, and v values
         let sig: Signature = Signature {
             r, // as U256
             s, // as U256
