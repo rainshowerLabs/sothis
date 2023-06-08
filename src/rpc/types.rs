@@ -1,5 +1,10 @@
 use serde::{Deserialize, Serialize};
-use ethers::core::utils::rlp::*;
+use ethers::utils::hex;
+
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Signature;
+use ethers::types::U256;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
@@ -35,7 +40,7 @@ pub struct Transaction {
     pub gas: String,
     pub gasPrice: String,
     pub hash: String,
-    pub input: String,
+    pub input: String, // or data
     pub nonce: String,
     pub r: String,
     pub s: String,
@@ -45,10 +50,15 @@ pub struct Transaction {
     pub txType: String,
     pub v: String,
     pub value: String,
+    pub typed_tx: TypedTransaction,
 }
 
-impl rlp::Encodable for Transaction {
-    fn rlp_append(&self, s: &mut RlpStream) {
+impl Transaction {
+    pub fn rlp_serialize_tx(
+        &self,
+        chain_id: u64,
+        ) -> Result<String, Box<dyn std::error::Error>> {
+        // To have this work, we need to RLP encode tx params.
         // 0) `nonce`
         // 1) `gas_price`
         // 2) `gas_limit`
@@ -59,18 +69,35 @@ impl rlp::Encodable for Transaction {
         // 7) `r`
         // 8) `s`
 
-        s.begin_list(9)
-            .append(&self.nonce)
-            .append(&self.gasPrice)
-            .append(&self.gas)
-            .append(&self.to)
-            .append(&self.value)
-            .append(&self.input)
-            .append(&self.v)
-            .append(&self.r)
-            .append(&self.s);
+        self.typed_tx.set_to(self.to.as_ref().unwrap());
+        self.typed_tx.set_nonce(self.nonce.as_str());
+        self.typed_tx.set_value(self.value.as_str());
+        self.typed_tx.set_gas_price(self.gasPrice.as_str());
+        self.typed_tx.set_gas(self.gas.as_str());
+        self.typed_tx.set_chain_id(chain_id);
+        //  We need to convert `self.input` to Bytes firts to set the data
+        let input = hex::decode(self.input.as_str())?;
+        self.typed_tx.set_data(input.into());
+
+        // convert r and s to U256
+        // convert v to U64
+        let r: U256 = self.r.parse()?;
+        let s: U256 = self.s.parse()?;
+        let v: u64 = self.v.parse()?;
+
+        // create a new use ethers::types::Signature with the
+        // r, s and v values
+        let sig: Signature = Signature {
+            r, // as U256
+            s, // as U256
+            v, // as U64
+        };
+
+        let encoded = self.typed_tx.rlp_signed(&sig);
+        Ok(hex::encode(encoded))
     }
 }
+
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(non_snake_case)]
