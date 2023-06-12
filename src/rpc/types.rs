@@ -72,7 +72,7 @@ impl Transaction {
         // 7) `r`
         // 8) `s`
 
-        // This way of dealing with the borrow checker is probably not good but fuck it we ball
+        // features set to legacy, this is a legacy tx
         let mut typed_tx: TypedTransaction = Default::default();
 
         // If to doesnt contain a value, set it
@@ -82,6 +82,8 @@ impl Transaction {
             },
             None => (),
         };
+
+        // This way of dealing with the borrow checker is probably not good but fuck it we ball
 
         let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
         typed_tx.set_nonce(nonce);
