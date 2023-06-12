@@ -36,7 +36,7 @@ pub struct BlockResult {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[allow(dead_code, non_snake_case)]
+#[allow(non_snake_case)]
 pub struct Transaction {
     pub blockHash: String,
     pub blockNumber: String,
@@ -75,7 +75,7 @@ impl Transaction {
         // This way of dealing with the borrow checker is probably not good but fuck it we ball
         let mut typed_tx: TypedTransaction = Default::default();
 
-        // If to doesnt contain a value, have it be `""`
+        // If to doesnt contain a value, set it
         match self.to {
             Some(_) => {
                 typed_tx.set_to(self.to.clone().expect("REASON"));
@@ -103,10 +103,13 @@ impl Transaction {
         let input = self.input.trim_start_matches("0x");
 
         let input = hex::decode(input)?;
-        typed_tx.set_data(input.into());
+        let input: ethers::types::Bytes = input.into();
+        typed_tx.set_data(input);
 
         // convert r and s to U256
         // convert v to U64
+        // r, s and v are str's. it doesnt matter too much performance wise that we
+        // are converting it here since we are only using it here
         let r: U256 = U256::from_str(&self.r)?;
         let s: U256 = U256::from_str(&self.s)?;
         let v: u64 = hex_to_decimal(&self.v)?;
@@ -119,7 +122,7 @@ impl Transaction {
         };
 
         let encoded = typed_tx.rlp_signed(&sig);
-        println!("ENCODED: {:?}", typed_tx.rlp_signed(&sig));
+        println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(hex::encode(encoded))
     }
 }
