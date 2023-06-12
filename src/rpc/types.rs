@@ -76,15 +76,12 @@ impl Transaction {
         let mut typed_tx: TypedTransaction = Default::default();
 
         // If to doesnt contain a value, have it be `""`
-        let to: String;
-        to = match self.to {
+        match self.to {
             Some(_) => {
-                self.to.clone().expect("REASON")
+                typed_tx.set_to(self.to.clone().expect("REASON"));
             },
-            None => "".to_string(),
+            None => (),
         };
-
-        typed_tx.set_to(to);
 
         let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
         typed_tx.set_nonce(nonce);
@@ -122,7 +119,7 @@ impl Transaction {
         };
 
         let encoded = typed_tx.rlp_signed(&sig);
-        println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
+        println!("ENCODED: {:?}", typed_tx.rlp_signed(&sig));
         Ok(hex::encode(encoded))
     }
 }
