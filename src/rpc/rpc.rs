@@ -88,9 +88,13 @@ impl RpcConnection {
             Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
         };
 
-        let response = match serde_json::from_value::<JsonRpcResponse>(response) {
+        let response = match serde_json::from_value::<JsonRpcResponse>(response.clone()) {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
+            Err(_) => {
+                // If we cannot get the value here, desirialize as an error and get the response message
+                let err = &response["error"]["message"];
+                return Err(RequestError::RequestFailed(err.to_string()));
+            },
         };
 
         Ok(response.result.to_string())

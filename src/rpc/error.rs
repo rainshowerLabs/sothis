@@ -40,4 +40,3 @@ impl From<Box<dyn std::error::Error>> for RequestError {
         RequestError::UnknownError(err)
     }
 }
-
