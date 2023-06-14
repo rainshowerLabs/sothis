@@ -74,9 +74,9 @@ impl RpcConnection {
             });
         }
 
-        // #[cfg(debug_assertions)] {
-        //     println!("Sending request: {}", request.clone());
-        // }
+        #[cfg(debug_assertions)] {
+            println!("Sending request: {}", request.clone());
+        }
 
         let response = match self.client.post(&self.url).json(&request).send().await {
             Ok(response) => response,

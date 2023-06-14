@@ -123,9 +123,12 @@ impl Transaction {
             v, // as U64
         };
 
-        let encoded = typed_tx.rlp_signed(&sig);
-        println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
-        Ok(hex::encode(encoded))
+        let encoded = hex::encode(typed_tx.rlp_signed(&sig));
+        // Add 0x prefix to encoded tx
+        let encoded = format!("0x{}", encoded);
+
+        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
+        Ok(encoded)
     }
 }
 
