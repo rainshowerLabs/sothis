@@ -143,6 +143,10 @@ impl RpcConnection {
         chain_id: u64,
     ) -> Result<String, RequestError> {
         let mut tx = tx.clone();
+
+        #[cfg(debug_assertions)] {
+            println!("transaction hash: {}", tx.hash);
+        }
         let params = tx.rlp_serialize_tx(chain_id)?;
         let params = json!([params]);
 
