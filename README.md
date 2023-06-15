@@ -6,7 +6,8 @@ Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** t
 
 ## Usage
 
-Sothis currently has 2 modes. Live and historic. 
+Sothis currently has 2 modes. Live and historic.   
+
 ***IMPORTANT:*** Hardhat support is currently experimental. If you are using Hardhat, add the `--send_as_raw` argument.
 
 ### Historic
