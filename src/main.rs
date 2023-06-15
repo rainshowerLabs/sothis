@@ -16,6 +16,7 @@ use rpc::rpc::RpcConnection;
 pub struct AppConfig {
     exit_on_tx_fail: bool,
     send_as_raw: bool,
+    entropy_threshold: f32,
 }
 
 lazy_static! {
@@ -59,6 +60,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("send_as_raw")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
+        .arg(Arg::new("entropy_threshold")
+            .long("entropy_threshold")
+            .num_args(1..)
+            .default_value("0.07")
+            .help("Set the percentage of failed transactions to trigger a warning"))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
@@ -70,6 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut app_config = APP_CONFIG.lock()?;
         app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
         app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
+        app_config.entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
     }
 
     let source_rpc = RpcConnection::new(source_rpc);

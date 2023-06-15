@@ -44,7 +44,7 @@ pub async fn send_transactions(
 
     // Calculate the percentage of failed transactions
     let fail_percent = fail_tx_amount / tx_amount;
-    if fail_percent > 0.07 {
+    if fail_percent > app_config.entropy_threshold {
         println!("!!! \x1b[91mHigh entropy detected!\x1b[0m Fail ratio: {}. Consider restarting the fork\x1b[0m !!!", format!("{:.2}%", fail_percent * 100.0));
     }
 
