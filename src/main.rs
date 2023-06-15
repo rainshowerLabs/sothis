@@ -26,7 +26,7 @@ lazy_static! {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
-        .version("0.1.3")
+        .version("0.2.0")
         .author("makemake <vukasin@gostovic.me>")
         .about("Tool for replaying historical transactions. Designed to be used with anvil")
         .arg(Arg::new("source_rpc")
