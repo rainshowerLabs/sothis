@@ -13,15 +13,31 @@ pub async fn send_transactions(
     let tx_amount = historical_txs.len() as f32;
     let mut fail_tx_amount: f32 = 0.0;
 
-    for tx in historical_txs {
-        // Gracefully handle errors so execution doesn't halt on error
-        match replay_rpc.send_raw_transaction(tx, chain_id).await {
-            Ok(_) => (),
-            Err(e) => if app_config.exit_on_tx_fail {
-                return Err(e.into());
-            } else {
-                fail_tx_amount += 1.0;
-                println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+    // This is jank, but it should work
+    if app_config.send_as_raw {
+        for tx in historical_txs {
+            // Gracefully handle errors so execution doesn't halt on error
+            match replay_rpc.send_raw_transaction(tx, chain_id).await {
+                Ok(_) => (),
+                Err(e) => if app_config.exit_on_tx_fail {
+                    return Err(e.into());
+                } else {
+                    fail_tx_amount += 1.0;
+                    println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+                }
+            }
+        }
+    } else {
+        for tx in historical_txs {
+            // Gracefully handle errors so execution doesn't halt on error
+            match replay_rpc.send_unsigned_transaction(tx, chain_id).await {
+                Ok(_) => (),
+                Err(e) => if app_config.exit_on_tx_fail {
+                    return Err(e.into());
+                } else {
+                    fail_tx_amount += 1.0;
+                    println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+                }
             }
         }
     }

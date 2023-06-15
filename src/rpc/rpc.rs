@@ -157,8 +157,21 @@ impl RpcConnection {
     // Send tx without checking signature
     pub async fn send_unsigned_transaction(
         &self,
-        tx: TransactionParams,
+        tx: Transaction,
+        chain_id: u64,
     ) -> Result<String, RequestError> {
+        // Put the relevant values of `Transaction` into `TransactionParams`
+        let tx = TransactionParams {
+            from: tx.from,
+            to: tx.to,
+            gas: tx.gas,
+            gasPrice: tx.gasPrice,
+            value: tx.value,
+            data: tx.input,
+            nonce: tx.nonce,
+            chainId: chain_id.to_string(),
+        };
+
         let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
         Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
     }
