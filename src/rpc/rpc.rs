@@ -91,7 +91,7 @@ impl RpcConnection {
         let response = match serde_json::from_value::<JsonRpcResponse>(response.clone()) {
             Ok(response) => response,
             Err(_) => {
-                // If we cannot get the value here, desirialize as an error and get the response message
+                // If we cannot get the value here, deserialize as an error and get the response message
                 let err = &response["error"]["message"];
                 return Err(RequestError::RequestFailed(err.to_string()));
             },
