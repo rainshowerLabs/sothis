@@ -1,6 +1,8 @@
 mod rpc;
 mod replay;
 
+use crate::replay::replay::replay_historic_blocks;
+use crate::replay::replay::replay_live;
 use clap::{Command, Arg};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -8,7 +10,7 @@ use lazy_static::lazy_static;
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
-use crate::replay::*;
+
 
 // Settings flags
 #[derive(Default)]
@@ -68,6 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut app_config = APP_CONFIG.lock()?;
         app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
+        app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
