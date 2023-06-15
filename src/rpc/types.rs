@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use ethers::utils::hex;
+use ethers::types::H160;
 
 use std::str::FromStr;
 use std::borrow::Cow;
@@ -79,10 +80,12 @@ impl Transaction {
         // If to doesnt contain a value, set it
         match self.to {
             Some(_) => {
-                typed_tx.set_to(self.to.clone().expect("REASON"));
+                let address = H160::from_str(&self.to.clone().expect("Can't read `to` field"));
+                typed_tx.set_to(address?);
             },
             None => (),
         };
+        println!("typed_tx to: {:?}", typed_tx.to());
 
         // This way of dealing with the borrow checker is probably not good but fuck it we ball
 

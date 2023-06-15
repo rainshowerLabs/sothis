@@ -74,9 +74,9 @@ impl RpcConnection {
             });
         }
 
-        #[cfg(debug_assertions)] {
-            println!("Sending request: {}", request.clone());
-        }
+        // #[cfg(debug_assertions)] {
+        //     println!("Sending request: {}", request.clone());
+        // }
 
         let response = match self.client.post(&self.url).json(&request).send().await {
             Ok(response) => response,
@@ -144,9 +144,6 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         let mut tx = tx.clone();
 
-        #[cfg(debug_assertions)] {
-            println!("transaction hash: {}", tx.hash);
-        }
         let params = tx.rlp_serialize_tx(chain_id)?;
         let params = json!([params]);
 
