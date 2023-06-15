@@ -85,7 +85,6 @@ impl Transaction {
             },
             None => (),
         };
-        println!("typed_tx to: {:?}", typed_tx.to());
 
         // This way of dealing with the borrow checker is probably not good but fuck it we ball
 
