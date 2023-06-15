@@ -4,7 +4,6 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
-use rlp::RlpStream;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -81,7 +80,7 @@ impl RpcConnection {
 
         let response = match self.client.post(&self.url).json(&request).send().await {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::RequestFailed(err.to_string())),
+            Err(err) => return Err(RequestError::JsonSerializationFailed(err.to_string())),
         };
 
         let response: serde_json::Value = match response.json().await {
@@ -89,9 +88,13 @@ impl RpcConnection {
             Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
         };
 
-        let response = match serde_json::from_value::<JsonRpcResponse>(response) {
+        let response = match serde_json::from_value::<JsonRpcResponse>(response.clone()) {
             Ok(response) => response,
-            Err(err) => return Err(RequestError::JsonDeserializationFailed(err.to_string())),
+            Err(_) => {
+                // If we cannot get the value here, deserialize as an error and get the response message
+                let err = &response["error"]["message"];
+                return Err(RequestError::RequestFailed(err.to_string()));
+            },
         };
 
         Ok(response.result.to_string())
@@ -137,36 +140,12 @@ impl RpcConnection {
     pub async fn send_raw_transaction(
         &self,
         tx: Transaction,
+        chain_id: u64,
     ) -> Result<String, RequestError> {
-        // To have this work, we need to RLP encode tx params.
-        // 0) `nonce`
-        // 1) `gas_price`
-        // 2) `gas_limit`
-        // 3) `to`
-        // 4) `value`
-        // 5) `data`
-        // 6) `v`
-        // 7) `r`
-        // 8) `s`
+        let mut tx = tx.clone();
 
-        let mut stream = RlpStream::new();
-        stream.begin_unbounded_list();
-        stream
-            .append(&hex_to_decimal(&tx.nonce)?)
-            .append(&hex_to_decimal(&tx.gasPrice)?)
-            .append(&hex_to_decimal(&tx.gas)?)
-            .append(&tx.to)
-            .append(&hex_to_decimal(&tx.value)?)
-            .append(&tx.value)
-            .append(&tx.v)
-            .append(&tx.r)
-            .append(&tx.s)
-        .finalize_unbounded_list();
-
-        let stream = stream.out();
-        let params = json!(*stream);
-
-        println!("params: {:#?}", params);
+        let params = tx.rlp_serialize_tx(chain_id)?;
+        let params = json!([params]);
 
         Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }

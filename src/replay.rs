@@ -7,6 +7,7 @@ use crate::rpc::types::*;
 async fn send_transactions(
     replay_rpc: RpcConnection,
     historical_txs: Vec<Transaction>,
+    chain_id: u64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let app_config = APP_CONFIG.lock()?;
 
@@ -15,7 +16,7 @@ async fn send_transactions(
 
     for tx in historical_txs {
         // Gracefully handle errors so execution doesn't halt on error
-        match replay_rpc.send_raw_transaction(tx).await {
+        match replay_rpc.send_raw_transaction(tx, chain_id).await {
             Ok(_) => success_tx_amount += 1.0,
             Err(e) => if app_config.exit_on_tx_fail {
                 return Err(e.into());
@@ -79,7 +80,7 @@ pub async fn replay_historic_blocks(
         let historical_txs = historical_block.transactions;
 
         // send transactions to mempool
-        send_transactions(replay_rpc.clone(), historical_txs).await?;
+        send_transactions(replay_rpc.clone(), historical_txs, hex_to_decimal(&replay_chainid)?).await?;
 
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(

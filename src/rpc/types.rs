@@ -1,5 +1,15 @@
 use serde::{Deserialize, Serialize};
-use ethers::core::utils::rlp::*;
+use ethers::utils::hex;
+use ethers::types::H160;
+
+use std::str::FromStr;
+use std::borrow::Cow;
+
+use ethers::types::transaction::eip2718::TypedTransaction;
+use ethers::types::Signature;
+use ethers::types::U256;
+
+use crate::hex_to_decimal;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
@@ -26,8 +36,8 @@ pub struct BlockResult {
     uncles: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[allow(dead_code, non_snake_case)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[allow(non_snake_case)]
 pub struct Transaction {
     pub blockHash: String,
     pub blockNumber: String,
@@ -35,7 +45,7 @@ pub struct Transaction {
     pub gas: String,
     pub gasPrice: String,
     pub hash: String,
-    pub input: String,
+    pub input: String, // or data
     pub nonce: String,
     pub r: String,
     pub s: String,
@@ -47,8 +57,12 @@ pub struct Transaction {
     pub value: String,
 }
 
-impl rlp::Encodable for Transaction {
-    fn rlp_append(&self, s: &mut RlpStream) {
+impl Transaction {
+    pub fn rlp_serialize_tx(
+        &mut self,
+        chain_id: u64,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        // To have this work, we need to RLP encode tx params.
         // 0) `nonce`
         // 1) `gas_price`
         // 2) `gas_limit`
@@ -59,18 +73,69 @@ impl rlp::Encodable for Transaction {
         // 7) `r`
         // 8) `s`
 
-        s.begin_list(9)
-            .append(&self.nonce)
-            .append(&self.gasPrice)
-            .append(&self.gas)
-            .append(&self.to)
-            .append(&self.value)
-            .append(&self.input)
-            .append(&self.v)
-            .append(&self.r)
-            .append(&self.s);
+        // features set to legacy, this is a legacy tx
+        let mut typed_tx: TypedTransaction = Default::default();
+
+        //todo: fix this
+        // If to doesnt contain a value, set it
+        match self.to {
+            Some(_) => {
+                let address = H160::from_str(&self.to.clone().expect("Can't read `to` field"));
+                typed_tx.set_to(address?);
+            },
+            None => (),
+        };
+        println!("typed_tx to: {:?}", typed_tx.to());
+
+        // This way of dealing with the borrow checker is probably not good but fuck it we ball
+
+        let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
+        typed_tx.set_nonce(nonce);
+
+        let value: U256 = Cow::Borrowed(&self.value.as_str()).parse()?;
+        typed_tx.set_value(value);
+
+        let gas_price: U256 = Cow::Borrowed(&self.gasPrice).parse()?;
+        typed_tx.set_gas_price(gas_price);
+
+        let gas: U256 = Cow::Borrowed(&self.gas).parse()?;
+        typed_tx.set_gas(gas);
+
+        typed_tx.set_chain_id(chain_id);
+
+        // We need to convert `self.input` to Bytes first to set the data
+
+        // Remove 0x prefix from input if present
+        let input = self.input.trim_start_matches("0x");
+
+        let input = hex::decode(input)?;
+        let input: ethers::types::Bytes = input.into();
+        typed_tx.set_data(input);
+
+        // convert r and s to U256
+        // convert v to U64
+        // r, s and v are str's. it doesnt matter too much performance wise that we
+        // are converting it here since we are only using it here
+        let r: U256 = U256::from_str(&self.r)?;
+        let s: U256 = U256::from_str(&self.s)?;
+        let v: u64 = hex_to_decimal(&self.v)?;
+
+        // create a new use ethers::types::Signature with the r, s, and v values
+        let sig: Signature = Signature {
+            r, // as U256
+            s, // as U256
+            v, // as U64
+        };
+
+        let encoded = hex::encode(typed_tx.rlp_signed(&sig));
+        // Add 0x prefix to encoded tx
+        let encoded = format!("0x{}", encoded);
+
+        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
+        Ok(encoded)
     }
 }
+
 
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(non_snake_case)]
