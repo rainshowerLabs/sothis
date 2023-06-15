@@ -11,7 +11,6 @@ use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
 
-
 // Settings flags
 #[derive(Default)]
 pub struct AppConfig {
