@@ -2,11 +2,12 @@
 
 # `sothis`
 
-Sothis is a tool for replaying historical state on a local ***anvil/hardhat(soon)*** testnet node. 
+Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node. 
 
 ## Usage
 
 Sothis currently has 2 modes. Live and historic. 
+***IMPORTANT:*** Hardhat support is currently experimental. If you are using Hardhat, add the `--send_as_raw` argument.
 
 ### Historic
 
