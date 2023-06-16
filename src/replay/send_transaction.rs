@@ -13,7 +13,8 @@ pub async fn send_transactions(
     let tx_amount = historical_txs.len() as f32;
     let mut fail_tx_amount: f32 = 0.0;
 
-    // This is jank, but it should work
+    // TODO: This is really bad, please reimplement this
+
     if app_config.send_as_raw {
         for tx in historical_txs {
             // Gracefully handle errors so execution doesn't halt on error
