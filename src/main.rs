@@ -69,8 +69,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("track_state")
             .short('t')
             .num_args(0..)
-            .help("Exit the program if a transaction fails"))
-
+            .help("Track the change of a state variable"))
+        .arg(Arg::new("contract_address")
+            .long("contract_address")
+            .short('c')
+            .num_args(1..)
+            .help("Address of the contract we're tracking storage."))
+        .arg(Arg::new("storage_slot")
+            .long("storage_slot")
+            .short('s')
+            .num_args(1..)
+            .help("Storage slot for the variable we're tracking"))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
