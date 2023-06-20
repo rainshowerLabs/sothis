@@ -1,8 +1,10 @@
 mod rpc;
 mod replay;
+mod tracker;
 
 use crate::replay::replay::replay_historic_blocks;
 use crate::replay::replay::replay_live;
+use crate::tracker::tracker::track_state;
 use clap::{Command, Arg};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -109,6 +111,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "live" => {
             println!("Replaying live blocks...");
             replay_live(replay_rpc, source_rpc).await?;
+        }
+        "track" => {
+            println!("Tracking state variable...");
+            track_state().await;
         }
         &_ => {
             // handle this properly later
