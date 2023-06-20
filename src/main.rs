@@ -56,15 +56,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("exit_on_tx_fail")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
-        .arg(Arg::new("send_as_raw")
-            .long("send_as_raw")
-            .num_args(0..)
-            .help("Exit the program if a transaction fails"))
         .arg(Arg::new("entropy_threshold")
             .long("entropy_threshold")
             .num_args(1..)
             .default_value("0.07")
             .help("Set the percentage of failed transactions to trigger a warning"))
+        .arg(Arg::new("send_as_raw")
+            .long("send_as_raw")
+            .num_args(0..)
+            .help("Exit the program if a transaction fails"))
+        .arg(Arg::new("track_state")
+            .long("track_state")
+            .short('t')
+            .num_args(0..)
+            .help("Exit the program if a transaction fails"))
+
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
