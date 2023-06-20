@@ -149,7 +149,16 @@ impl RpcConnection {
 
         Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }
+    // Sends raw transaction
+    pub async fn get_storage_at(
+        &self,
+        address: String,
+        slot: u64,
+    ) -> Result<String, RequestError> {
+        let params = json!([address, slot, "latest"]);
 
+        Ok(self.send_request("eth_sendRawTransaction", params).await?)
+    }
     /* 
      * hardhat/anvil specific RPC
      */
