@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
         .version("0.3.0")
         .author("makemake <vukasin@gostovic.me>")
-        .about("Tool for replaying historical transactions. Designed to be used with anvil")
+        .about("Tool for replaying historical transactions. Designed to be used with anvil or hardhat.")
         .arg(Arg::new("source_rpc")
             .long("source_rpc")
             .short('s')
