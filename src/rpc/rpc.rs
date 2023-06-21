@@ -4,6 +4,7 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
+use ethers::types::U256;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -127,6 +128,18 @@ impl RpcConnection {
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
 
+    // Sends raw transaction
+    pub async fn get_storage_at(
+        &self,
+        address: String,
+        slot: U256,
+    ) -> Result<String, RequestError> {
+        let params = json!([address, slot, "latest"]);
+        let result = self.send_request("eth_getStorageAt", params).await?;
+
+        Ok(result.trim_matches('\"').to_string())
+    }
+
     // Gets transaction by hash (duh).
     pub async fn get_transaction_by_hash(
         &self,
@@ -218,7 +231,10 @@ impl RpcConnection {
      */
 
     // Listen for new blocks, return latest blocknumber on new block.
-    pub async fn listen_for_blocks(&self) -> Result<String, RequestError> {
+    pub async fn listen_for_blocks(
+        &self,
+        time: u64,
+    ) -> Result<String, RequestError> {
         // theres a million ways to do it than this but i couldnt be bothered
         let blocknumber = self.block_number().await?;
         let mut new_blocknumber = blocknumber.clone();
@@ -226,7 +242,7 @@ impl RpcConnection {
 
         while blocknumber == new_blocknumber {
             // sleep for 1 second
-            sleep(Duration::from_millis(1000));
+            sleep(Duration::from_millis(time));
             new_blocknumber = self.block_number().await?
         }
 

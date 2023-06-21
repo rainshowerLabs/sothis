@@ -1,6 +1,6 @@
 [package]
 name = "sothis"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["makemake <vukasin@gostovic.me>"]
 license = "GPL-3.0-or-later"
@@ -14,6 +14,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = "4.3.0"
+ctrlc = "3.4.0"
 env = "0.0.0"
 ethers = {version = "2.0.7", features = ["legacy"]}
 lazy_static = "1.4.0"
