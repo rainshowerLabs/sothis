@@ -30,7 +30,7 @@ lazy_static! {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
-        .version("0.2.0")
+        .version("0.3.0")
         .author("makemake <vukasin@gostovic.me>")
         .about("Tool for replaying historical transactions. Designed to be used with anvil")
         .arg(Arg::new("source_rpc")
@@ -48,14 +48,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("replay_rpc")
             .short('r')
             .num_args(1..)
-            .required(true)
             .help("HTTP JSON-RPC of the node we're replaying data to"))
         .arg(Arg::new("mode")
             .long("mode")
             .short('m')
             .num_args(1..)
             .default_value("historic")
-            .help("Choose between live replay or historic"))
+            .help("Choose between live, historic replay, or tracking"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(0..)
@@ -75,25 +74,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("send_as_raw")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
-        .arg(Arg::new("track_state")
-            .long("track_state")
-            .short('a')
-            .num_args(0..)
-            .help("Track the change of a state variable"))
         .arg(Arg::new("contract_address")
             .long("contract_address")
             .short('c')
             .num_args(1..)
+            .required_if_eq("mode", "track")
             .help("Address of the contract we're tracking storage."))
         .arg(Arg::new("storage_slot")
             .long("storage_slot")
             .short('l')
             .num_args(1..)
+            .required_if_eq("mode", "track")
             .help("Storage slot for the variable we're tracking"))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
-    let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
     let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
 
     // Set settings
@@ -106,7 +101,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
-    let replay_rpc = RpcConnection::new(replay_rpc);
     
     match mode.as_str() {
         "historic" => {
@@ -115,10 +109,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
             let block = format_number_input(&block);
 
+            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+            let replay_rpc = RpcConnection::new(replay_rpc);
+
             replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
         },
         "live" => {
             println!("Replaying live blocks...");
+
+            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+            let replay_rpc = RpcConnection::new(replay_rpc);
+
             replay_live(replay_rpc, source_rpc).await?;
         }
         "track" => {

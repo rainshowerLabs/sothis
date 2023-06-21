@@ -1,3 +1,4 @@
+use crate::hex_to_decimal;
 use crate::APP_CONFIG;
 use crate::RpcConnection;
 use crate::tracker::types::*;
@@ -24,14 +25,15 @@ pub async fn track_state(
 
 	loop {
 		let block_number = source_rpc.listen_for_blocks(block_time).await?;
+		let block_number = hex_to_decimal(&block_number)?; // FIXME: this returns a u64, change this
 		let latest_slot = source_rpc.get_storage_at(contract_address.clone(), storage_slot.clone()).await?;
 
 		let slot = StateChange {
-			block_number: block_number.parse::<u64>()?,
+			block_number: block_number.into(),
 			value: latest_slot,
 		};
 
-		if storage.state_changes.last().unwrap() != &slot {
+		if storage.state_changes.last().map(|change| change.value != slot.value).unwrap_or(true) {
 			println!("New storage slot value: {:?}", &slot.value);
 			storage.state_changes.push(slot);
 		}

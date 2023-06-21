@@ -135,7 +135,7 @@ impl RpcConnection {
         slot: U256,
     ) -> Result<String, RequestError> {
         let params = json!([address, slot, "latest"]);
-        let result = self.send_request("eth_sendRawTransaction", params).await?;
+        let result = self.send_request("eth_getStorageAt", params).await?;
 
         Ok(result)
     }

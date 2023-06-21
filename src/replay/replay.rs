@@ -75,7 +75,6 @@ pub async fn replay_live(
     replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
     ) -> Result<(), Box<dyn std::error::Error>> {
-    // Release the lock immediately since its gonna be in use by `replay_historic_blocks`
     let block_time;
     {
         let app_config = APP_CONFIG.lock()?;
