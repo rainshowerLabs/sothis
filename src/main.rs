@@ -19,6 +19,7 @@ pub struct AppConfig {
     exit_on_tx_fail: bool,
     send_as_raw: bool,
     entropy_threshold: f32,
+    block_listen_time: u64,
 }
 
 lazy_static! {
@@ -58,6 +59,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("exit_on_tx_fail")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
+        .arg(Arg::new("block_listen_time")
+            .long("block_listen_time")
+            .short('t')
+            .num_args(1..)
+            .default_value("500")
+            .help("Time in ms to check for new blocks."))
         .arg(Arg::new("entropy_threshold")
             .long("entropy_threshold")
             .num_args(1..)
@@ -94,6 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
         app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
         app_config.entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
+        app_config.block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
@@ -114,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "track" => {
             println!("Tracking state variable...");
-            track_state().await;
+            track_state(source_rpc).await?;
         }
         &_ => {
             // handle this properly later

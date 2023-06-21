@@ -227,7 +227,10 @@ impl RpcConnection {
      */
 
     // Listen for new blocks, return latest blocknumber on new block.
-    pub async fn listen_for_blocks(&self) -> Result<String, RequestError> {
+    pub async fn listen_for_blocks(
+        &self,
+        time: u64,
+    ) -> Result<String, RequestError> {
         // theres a million ways to do it than this but i couldnt be bothered
         let blocknumber = self.block_number().await?;
         let mut new_blocknumber = blocknumber.clone();
@@ -235,7 +238,7 @@ impl RpcConnection {
 
         while blocknumber == new_blocknumber {
             // sleep for 1 second
-            sleep(Duration::from_millis(1000));
+            sleep(Duration::from_millis(time));
             new_blocknumber = self.block_number().await?
         }
 
