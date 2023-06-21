@@ -137,7 +137,7 @@ impl RpcConnection {
         let params = json!([address, slot, "latest"]);
         let result = self.send_request("eth_getStorageAt", params).await?;
 
-        Ok(result)
+        Ok(result.trim_matches('\"').to_string())
     }
 
     // Gets transaction by hash (duh).
