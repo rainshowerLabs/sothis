@@ -45,6 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("terminal_block")
             .short('b')
             .num_args(1..)
+            .required_if_eq("mode", "historic")
             .help("Block we're replaying until"))
         .arg(Arg::new("replay_rpc")
             .long("replay_rpc")
