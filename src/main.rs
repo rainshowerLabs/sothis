@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("path")
             .short('p')
             .num_args(1..)
-            .default_value("./")
+            .default_value(".")
             .help("Path to file we're writing to"))
         .arg(Arg::new("filename")
             .long("filename")
