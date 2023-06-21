@@ -1,4 +1,4 @@
-![sothis_logo](https://github.com/makemake-kbo/sothis/assets/55022497/c4508232-71e2-42c8-aaec-aa35c668983b)
+![f3f86624-a5b0-4c60-a44b-4dc1a2ce25a0](https://github.com/rainshowerLabs/sothis/assets/55022497/a5e5dda2-875c-4d88-88bd-88d5f945854d)
 
 # `sothis`
 
