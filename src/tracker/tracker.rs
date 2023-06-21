@@ -2,9 +2,12 @@ use crate::hex_to_decimal;
 use crate::APP_CONFIG;
 use crate::RpcConnection;
 use crate::tracker::types::*;
+use crate::tracker::time::get_latest_unix_timestamp;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::fs;
+
 use ctrlc;
 use ethers::types::U256;
 
@@ -28,9 +31,13 @@ pub async fn track_state(
 
 	// Release the lock immediately since we're gonna use it later
     let block_time;
+    let path;
+    let filename;
     {
         let app_config = APP_CONFIG.lock()?;
         block_time = app_config.block_listen_time;
+        path = app_config.path.clone();
+        filename = app_config.filename.clone();
     }
 
 	loop {
@@ -54,6 +61,17 @@ pub async fn track_state(
 	}
 	let json = serde_json::to_string(&storage)?;
 	println!("Serialized storage: {}", json);
+
+	// Set the filename to `slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
+	let filename = if filename == "" {
+		let timestamp = get_latest_unix_timestamp();
+		format!("slot-{}-timestamp-{}.json", storage_slot, timestamp)
+	} else {
+		filename
+	};
+
+	let path = format!("{}/{}", path, filename);
+	fs::write(path, json)?;
 
 	Ok(())
 }

@@ -21,6 +21,8 @@ pub struct AppConfig {
     send_as_raw: bool,
     entropy_threshold: f32,
     block_listen_time: u64,
+    path: String,
+    filename: String,
 }
 
 lazy_static! {
@@ -86,6 +88,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .required_if_eq("mode", "track")
             .help("Storage slot for the variable we're tracking"))
+        .arg(Arg::new("path")
+            .long("path")
+            .short('p')
+            .num_args(1..)
+            .default_value("./")
+            .help("Path to file we're writing to"))
+        .arg(Arg::new("filename")
+            .long("filename")
+            .short('f')
+            .num_args(1..)
+            .default_value("")
+            .help("Path to file we're writing to"))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
@@ -98,6 +112,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
         app_config.entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
         app_config.block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+        app_config.path = matches.get_one::<String>("path").expect("required").to_string();
+        app_config.filename = matches.get_one::<String>("filename").expect("required").to_string();
     }
 
     let source_rpc = RpcConnection::new(source_rpc);
