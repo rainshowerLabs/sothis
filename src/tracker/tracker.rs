@@ -64,7 +64,7 @@ pub async fn track_state(
 	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
 	let filename = if filename == "" {
 		let timestamp = get_latest_unix_timestamp();
-		format!("address-{}slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
+		format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
 	} else {
 		filename
 	};

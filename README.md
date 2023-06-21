@@ -99,7 +99,7 @@ The result is saved to a JSON file that looks like this:
 - `--source_rpc`: RPC of the node we are getting data from.
 - `--contract_address`: Address of the contract we are reading storage from.
 - `--storage_slot`: The storage slot of the contract.
-- `--filename`(optional): Name of our output file. The default filename is formatted as: `address-{}slot-{}-timestamp-{}.json`.
+- `--filename`(optional): Name of our output file. The default filename is formatted as: `address-{}-slot-{}-timestamp-{}.json`.
 - `--path`(optional): Path to our output file. The default path is the current directory.
 
 Once you are done tracking the slot, terminate the process via a `SIGTERM` or a `SIGKILL` (ctrl-c), which will terminate execution and write the file.
