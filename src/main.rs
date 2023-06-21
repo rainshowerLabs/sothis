@@ -141,7 +141,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "track" => {
             println!("Tracking state variable...");
-            println!("Send SIGTERM or SIGKILL to serialize to JSON, write and stop.");
+            println!("Send SIGTERM or SIGINT to serialize to JSON, write and stop.");
             
             let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
             let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
