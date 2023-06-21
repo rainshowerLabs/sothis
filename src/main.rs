@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Exit the program if a transaction fails"))
         .arg(Arg::new("track_state")
             .long("track_state")
-            .short('t')
+            .short('a')
             .num_args(0..)
             .help("Track the change of a state variable"))
         .arg(Arg::new("contract_address")
@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Address of the contract we're tracking storage."))
         .arg(Arg::new("storage_slot")
             .long("storage_slot")
-            .short('s')
+            .short('l')
             .num_args(1..)
             .help("Storage slot for the variable we're tracking"))
         .get_matches();
