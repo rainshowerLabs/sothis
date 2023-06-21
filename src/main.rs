@@ -2,13 +2,14 @@ mod rpc;
 mod replay;
 mod tracker;
 
-use crate::replay::replay::replay_historic_blocks;
-use crate::replay::replay::replay_live;
-use crate::tracker::tracker::track_state;
 use clap::{Command, Arg};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
+use ethers::types::U256;
 
+use crate::replay::replay::replay_historic_blocks;
+use crate::replay::replay::replay_live;
+use crate::tracker::tracker::track_state;
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
@@ -122,7 +123,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "track" => {
             println!("Tracking state variable...");
-            track_state(source_rpc).await?;
+            println!("Send SIGTERM or SIGKILL to serialize to JSON, write and stop.");
+            
+            let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
+            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
+            let storage_slot = U256::from_dec_str(&storage_slot)?;
+
+            track_state(source_rpc, storage_slot, contract_address).await?;
         }
         &_ => {
             // handle this properly later

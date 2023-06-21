@@ -4,6 +4,7 @@ use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use reqwest::Client;
+use ethers::types::U256;
 
 use crate::hex_to_decimal;
 use super::format::format_hex;
@@ -127,6 +128,18 @@ impl RpcConnection {
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
 
+    // Sends raw transaction
+    pub async fn get_storage_at(
+        &self,
+        address: String,
+        slot: U256,
+    ) -> Result<String, RequestError> {
+        let params = json!([address, slot, "latest"]);
+        let result = self.send_request("eth_sendRawTransaction", params).await?;
+
+        Ok(result)
+    }
+
     // Gets transaction by hash (duh).
     pub async fn get_transaction_by_hash(
         &self,
@@ -149,16 +162,7 @@ impl RpcConnection {
 
         Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }
-    // Sends raw transaction
-    pub async fn get_storage_at(
-        &self,
-        address: String,
-        slot: u64,
-    ) -> Result<String, RequestError> {
-        let params = json!([address, slot, "latest"]);
 
-        Ok(self.send_request("eth_sendRawTransaction", params).await?)
-    }
     /* 
      * hardhat/anvil specific RPC
      */
