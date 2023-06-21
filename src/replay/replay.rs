@@ -75,9 +75,15 @@ pub async fn replay_live(
     replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
     ) -> Result<(), Box<dyn std::error::Error>> {
-    let app_config = APP_CONFIG.lock()?;
+    // Release the lock immediately since its gonna be in use by `replay_historic_blocks`
+    let block_time;
+    {
+        let app_config = APP_CONFIG.lock()?;
+        block_time = app_config.block_listen_time;
+    }
+
     loop {
-        let latest_block = source_rpc.listen_for_blocks(app_config.block_listen_time).await?;
+        let latest_block = source_rpc.listen_for_blocks(block_time).await?;
         if latest_block != replay_rpc.block_number().await? {
             println!("New block detected, replaying...");
             replay_historic_blocks(source_rpc.clone(), replay_rpc.clone(), hex_to_decimal(&latest_block)?).await?;
