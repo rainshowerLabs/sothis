@@ -100,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .short('f')
             .num_args(1..)
             .default_value("")
-            .help("Path to file we're writing to"))
+            .help("Name of the file."))
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
