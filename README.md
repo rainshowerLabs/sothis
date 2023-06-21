@@ -116,7 +116,7 @@ Sothis is a rust crate. You can install it with cargo:
 
 ###  Why is sothis so slow?
 
-Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. It's recommended to use a your own local node.       
+Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. It's recommended to use your own local node.       
 If using `anvil` make sure you add the `--cups {REALL_HIGH_VALUE}` arg so anvil doesn't throttle itself.
 
 ### I have a problem with sothis. Can devs do something?
