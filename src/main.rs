@@ -20,7 +20,6 @@ pub struct AppConfig {
     exit_on_tx_fail: bool,
     send_as_raw: bool,
     entropy_threshold: f32,
-    replay_delay: u64,
     block_listen_time: u64,
     path: String,
     filename: String,
@@ -74,12 +73,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .default_value("0.07")
             .help("Set the percentage of failed transactions to trigger a warning"))
-        .arg(Arg::new("replay_delay")
-            .long("replay_delay")
-            .short('d')
-            .num_args(1..)
-            .default_value("0")
-            .help("Default delay for block replay in ms"))
         .arg(Arg::new("send_as_raw")
             .long("send_as_raw")
             .num_args(0..)
@@ -119,7 +112,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
         app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
         app_config.entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
-        app_config.replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
         app_config.block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
         app_config.path = matches.get_one::<String>("path").expect("required").to_string();
         app_config.filename = matches.get_one::<String>("filename").expect("required").to_string();
