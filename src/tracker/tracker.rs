@@ -1,4 +1,3 @@
-use crate::hex_to_decimal;
 use crate::APP_CONFIG;
 use crate::RpcConnection;
 use crate::tracker::types::*;
@@ -41,17 +40,17 @@ pub async fn track_state(
         filename = app_config.filename.clone();
     }
 
+    let mut block_number = source_rpc.block_number().await?;
 	loop {
         if interrupted.load(Ordering::SeqCst) {
             break;
         }
 
-		let block_number = source_rpc.listen_for_blocks(block_time).await?;
-		let block_number = hex_to_decimal(&block_number)?; // FIXME: this returns a u64, change this
+		let block_number_u256: U256 = block_number.parse()?;
 		let latest_slot = source_rpc.get_storage_at(contract_address.clone(), storage_slot.clone()).await?;
 
 		let slot = StateChange {
-			block_number: block_number.into(),
+			block_number: block_number_u256,
 			value: latest_slot,
 		};
 
@@ -59,6 +58,8 @@ pub async fn track_state(
 			println!("New storage slot value: {:?}", &slot.value);
 			storage.state_changes.push(slot);
 		}
+
+		block_number = source_rpc.listen_for_blocks(block_time).await?;
 	}
 	let json = serde_json::to_string(&storage)?;
 
