@@ -25,6 +25,7 @@ pub async fn track_state(
     })?;
 
 	let mut storage = StateChangeList {
+		address: contract_address.clone(),
 		storage_slot: storage_slot,
 		state_changes: Vec::new(),
 	};
