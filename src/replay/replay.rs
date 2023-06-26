@@ -1,3 +1,6 @@
+use std::thread::sleep;
+use tokio::time::Duration;
+
 use crate::APP_CONFIG;
 use crate::replay::send_transaction::send_transactions;
 use crate::RpcConnection;
@@ -37,6 +40,13 @@ pub async fn replay_historic_blocks(
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
 
+    // Get the time we're delaying the replay for
+    let replay_delay;
+    {
+        let app_config = APP_CONFIG.lock()?;
+        replay_delay = app_config.replay_delay;
+    }
+
     while until > replay_block {
         // we write a bit of illegible code
         let hex_block = decimal_to_hex(replay_block + 1);
@@ -60,6 +70,10 @@ pub async fn replay_historic_blocks(
         println!("Successfully replayed block {}", hex_to_decimal(&hex_block)?);
 
         replay_block = hex_to_decimal(&replay_rpc.block_number().await?)?;
+
+        // TODO: For some godforsaken reason i cannot do an infinite loop and break here or else it crashes.
+        // I feel dirty doing 2 checks for the same thing so you have to wait a bit ig.
+        sleep(Duration::from_millis(replay_delay));
     }
     println!("Done replaying blocks");
     Ok(())

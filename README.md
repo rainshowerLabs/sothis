@@ -26,6 +26,8 @@ Options:
           Time in ms to check for new blocks. [default: 500]
       --entropy_threshold <entropy_threshold>...
           Set the percentage of failed transactions to trigger a warning [default: 0.07]
+  -d, --replay_delay <replay_delay>...
+          Default delay for block replay in ms [default: 0]
       --send_as_raw [<send_as_raw>...]
           Exit the program if a transaction fails
   -c, --contract_address <contract_address>...
@@ -86,6 +88,7 @@ The tracking mode is used to track the change in value of a storage slot for a c
 The result is saved to a JSON file that looks like this:
 ```json
 {
+  "address":"0x1c479675ad559DC151F6Ec7ed3FbF8ceE79582B6",
 	"storage_slot":"0x0",
 	"state_changes":[
 		{"block_number":"0x10b7bbc","value":"0x00000000000000000000000000000000000000000000000000000000000e2b18"}
