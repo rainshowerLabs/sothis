@@ -1,3 +1,4 @@
+use url::Url;
 use std::thread::sleep;
 
 use tokio::time::Duration;
@@ -39,7 +40,7 @@ impl RpcConnection {
     pub fn new(url: String) -> Self {
         Self {
             client: Client::new(),
-            url,
+            url: Url::parse(&url).expect("REASON").into(),
         }
     }
 
