@@ -4,6 +4,10 @@
 
 Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node. 
 
+## Support and discussion
+
+Join the [Rainshower Labs discord server](https://discord.gg/Cs3h397gkz) to discuss sothis and get help.
+
 ## Usage
 
 Sothis has optional arguments that are not listed in their respective mode sections that might prove useful. Please study the help section below. You can view it any time by running `sothis --help`.
