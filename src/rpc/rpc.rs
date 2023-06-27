@@ -27,18 +27,10 @@ struct JsonRpcResponse {
     id: u32,
 }
 
+#[derive(Clone)]
 pub struct RpcConnection {
     client: Client,
     url: String,
-}
-
-impl Clone for RpcConnection {
-    fn clone(&self) -> Self {
-        RpcConnection {
-            client: self.client.clone(),
-            url: self.url.clone(),
-        }
-    }
 }
 
 #[allow(dead_code)]
