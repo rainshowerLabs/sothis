@@ -46,6 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("terminal_block")
             .short('b')
             .num_args(1..)
+            .default_value("9999999999999999999999999999999999999999999999999999999999999999999") // TODO: this is jank, handle not setting this arg properly
             .required_if_eq("mode", "historic")
             .help("Block we're replaying until"))
         .arg(Arg::new("replay_rpc")
@@ -131,13 +132,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "historic" => {
             println!("Replaying in historic mode...");
             
-            let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
-            let block = format_number_input(&block);
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let terminal_block = format_number_input(&terminal_block);
 
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&terminal_block)?).await?;
         },
         "live" => {
             println!("Replaying live blocks...");
@@ -154,8 +155,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
             let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
             let storage_slot = U256::from_dec_str(&storage_slot)?;
+            
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let terminal_block = format_number_input(&terminal_block);
 
-            track_state(source_rpc, storage_slot, contract_address).await?;
+            track_state(source_rpc, storage_slot, contract_address, terminal_block).await?;
         }
         &_ => {
             // handle this properly later
