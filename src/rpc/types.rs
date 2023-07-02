@@ -76,8 +76,6 @@ impl Transaction {
         // features set to legacy, this is a legacy tx
         let mut typed_tx: TypedTransaction = Default::default();
 
-        //todo: fix this
-        // If to doesnt contain a value, set it
         match self.to {
             Some(_) => {
                 let address = H160::from_str(&self.to.clone().expect("Can't read `to` field"));
