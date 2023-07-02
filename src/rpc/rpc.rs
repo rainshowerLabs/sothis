@@ -1,5 +1,6 @@
 use url::Url;
 use std::thread::sleep;
+use std::time::Instant;
 
 use tokio::time::Duration;
 use serde::{Deserialize, Serialize};
@@ -233,9 +234,23 @@ impl RpcConnection {
         let mut new_blocknumber = blocknumber.clone();
         println!("Listening for new blocks from block {}...", hex_to_decimal(&blocknumber).unwrap());
 
+        // Start timer for the *heartbeat*
+        let mut start_time = Instant::now();
+
         while blocknumber == new_blocknumber {
-            // sleep for 1 second
+            // sleep for set duration
             sleep(Duration::from_millis(time));
+            
+            // Add this as a *heartbeat* so users are less confused if nothing is happening
+            let elapsed_time = start_time.elapsed();
+
+            if elapsed_time >= Duration::from_secs(60) {
+                println!("!!! \x1b[93mNo new blocks have been detected in 60 seconds! Check your node(s)\x1b[0m !!!");
+                println!("Still listening...");
+                start_time = Instant::now();
+            }
+
+
             new_blocknumber = self.block_number().await?
         }
 
