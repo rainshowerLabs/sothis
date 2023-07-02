@@ -46,8 +46,8 @@ pub async fn replay_historic_blocks(
         let app_config = APP_CONFIG.lock()?;
         replay_delay = app_config.replay_delay;
     }
-
-    while until > replay_block {
+    
+    loop {
         // we write a bit of illegible code
         let hex_block = decimal_to_hex(replay_block + 1);
         // get block from historical node
@@ -71,8 +71,10 @@ pub async fn replay_historic_blocks(
 
         replay_block = hex_to_decimal(&replay_rpc.block_number().await?)?;
 
-        // TODO: For some godforsaken reason i cannot do an infinite loop and break here or else it crashes.
-        // I feel dirty doing 2 checks for the same thing so you have to wait a bit ig.
+        if replay_block >= until {
+            break;
+        }
+
         sleep(Duration::from_millis(replay_delay));
     }
     println!("Done replaying blocks");
