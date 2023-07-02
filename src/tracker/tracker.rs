@@ -45,7 +45,7 @@ pub async fn track_state(
     let mut block_number = source_rpc.block_number().await?;
 	loop {
 		// Crazy hamburger check
-		let has_reached_terminal_block: bool = terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= *tb).unwrap_or(false);
+		let has_reached_terminal_block = terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= *tb).unwrap_or(false);
         if interrupted.load(Ordering::SeqCst) || has_reached_terminal_block {
             break;
         }
