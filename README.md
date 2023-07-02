@@ -105,7 +105,7 @@ The result is saved to a JSON file that looks like this:
 - `--filename`(optional): Name of our output file. The default filename is formatted as: `address-{}-slot-{}-timestamp-{}.json`.
 - `--path`(optional): Path to our output file. The default path is the current directory.
 
-Once you are done tracking the slot, terminate the process via a `SIGTERM` or a `SIGINT` (ctrl-c), which will terminate execution and write the file.
+Once you are done tracking the slot, terminate the process via a `SIGTERM` or a `SIGINT` (ctrl-c), which will terminate execution and write the file. Keep in mind that sothis will check once per new block if you tried to terminate it. If no new block are produced on the source_rpc, sothis will not terminate and nothing will be written if you force close it.
 
 `sothis --mode track --source_rpc http://localhost:8545 --contract_address 0x1c479675ad559DC151F6Ec7ed3FbF8ceE79582B6 --storage_slot 0 --filename siuuu.json --path ~/Desktop
 `
