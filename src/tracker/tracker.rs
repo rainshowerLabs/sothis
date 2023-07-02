@@ -15,7 +15,7 @@ pub async fn track_state(
     source_rpc: RpcConnection,
     storage_slot: U256,
     contract_address: String,
-    terminal_block: String,
+    terminal_block: Option<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
@@ -43,7 +43,7 @@ pub async fn track_state(
 
     let mut block_number = source_rpc.block_number().await?;
 	loop {
-        if interrupted.load(Ordering::SeqCst) || block_number == terminal_block {
+        if interrupted.load(Ordering::SeqCst) || block_number == terminal_block.clone().unwrap_or_default() {
             break;
         }
 
@@ -73,7 +73,7 @@ pub async fn track_state(
 	};
 
 	let path = format!("{}/{}", path, filename);
-	println!("Writing to file: {}", path);
+	println!("\nWriting to file: {}", path);
 	fs::write(path, json)?;
 
 	Ok(())

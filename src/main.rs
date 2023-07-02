@@ -46,7 +46,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("terminal_block")
             .short('b')
             .num_args(1..)
-            .default_value("9999999999999999999999999999999999999999999999999999999999999999999") // TODO: this is jank, handle not setting this arg properly
             .required_if_eq("mode", "historic")
             .help("Block we're replaying until"))
         .arg(Arg::new("replay_rpc")
@@ -150,14 +149,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "track" => {
             println!("Tracking state variable...");
-            println!("Send SIGTERM or SIGINT to serialize to JSON, write and stop.");
+            println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
             
             let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
             let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
             let storage_slot = U256::from_dec_str(&storage_slot)?;
             
-            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
-            let terminal_block = format_number_input(&terminal_block);
+            // If terminal_block is set by the user use that, otherwise have it be none
+            let terminal_block: Option<String> = matches.get_one::<String>("terminal_block").map(|x| format_number_input(x));
+            if terminal_block == None {
+                println!("No terminal block set, tracking indefinitely.");
+            }
 
             track_state(source_rpc, storage_slot, contract_address, terminal_block).await?;
         }
