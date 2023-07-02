@@ -16,7 +16,7 @@ pub async fn track_state(
     source_rpc: RpcConnection,
     storage_slot: U256,
     contract_address: String,
-    terminal_block: Option<String>,
+    terminal_block: Option<u64>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
@@ -45,7 +45,8 @@ pub async fn track_state(
     let mut block_number = source_rpc.block_number().await?;
 	loop {
 		// Crazy hamburger check
-        if interrupted.load(Ordering::SeqCst) || terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= hex_to_decimal(tb).unwrap()).unwrap_or(false) {
+		let has_reached_terminal_block: bool = terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= *tb).unwrap_or(false);
+        if interrupted.load(Ordering::SeqCst) || has_reached_terminal_block {
             break;
         }
 

@@ -156,7 +156,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let storage_slot = U256::from_dec_str(&storage_slot)?;
             
             // If terminal_block is set by the user use that, otherwise have it be none
-            let terminal_block: Option<String> = matches.get_one::<String>("terminal_block").map(|x| format_number_input(x));
+            let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            
             if terminal_block == None {
                 println!("No terminal block set, tracking indefinitely.");
             }
