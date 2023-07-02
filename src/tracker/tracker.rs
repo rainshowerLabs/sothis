@@ -1,5 +1,6 @@
 use crate::APP_CONFIG;
 use crate::RpcConnection;
+use crate::rpc::format::hex_to_decimal;
 use crate::tracker::types::*;
 use crate::tracker::time::get_latest_unix_timestamp;
 
@@ -43,7 +44,8 @@ pub async fn track_state(
 
     let mut block_number = source_rpc.block_number().await?;
 	loop {
-        if interrupted.load(Ordering::SeqCst) || block_number == terminal_block.clone().unwrap_or_default() {
+		// Crazy hamburger check
+        if interrupted.load(Ordering::SeqCst) || terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= hex_to_decimal(tb).unwrap()).unwrap_or(false) {
             break;
         }
 
