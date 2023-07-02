@@ -33,7 +33,7 @@ lazy_static! {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
-        .version("0.3.1")
+        .version("0.3.2")
         .author("makemake <vukasin@gostovic.me>")
         .about("Tool for replaying historical transactions. Designed to be used with anvil or hardhat.")
         .arg(Arg::new("source_rpc")
@@ -131,13 +131,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "historic" => {
             println!("Replaying in historic mode...");
             
-            let block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
-            let block = format_number_input(&block);
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let terminal_block = format_number_input(&terminal_block);
 
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&block)?).await?;
+            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&terminal_block)?).await?;
         },
         "live" => {
             println!("Replaying live blocks...");
@@ -149,16 +149,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         "track" => {
             println!("Tracking state variable...");
-            println!("Send SIGTERM or SIGINT to serialize to JSON, write and stop.");
+            println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
             
             let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
             let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
             let storage_slot = U256::from_dec_str(&storage_slot)?;
+            
+            // If terminal_block is set by the user use that, otherwise have it be none
+            let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            
+            if terminal_block == None {
+                println!("No terminal block set, tracking indefinitely.");
+            }
 
-            track_state(source_rpc, storage_slot, contract_address).await?;
+            track_state(source_rpc, storage_slot, contract_address, terminal_block).await?;
         }
         &_ => {
-            // handle this properly later
             panic!("Mode does not exist!");
         },
     }

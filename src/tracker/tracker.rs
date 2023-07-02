@@ -1,5 +1,6 @@
 use crate::APP_CONFIG;
 use crate::RpcConnection;
+use crate::rpc::format::hex_to_decimal;
 use crate::tracker::types::*;
 use crate::tracker::time::get_latest_unix_timestamp;
 
@@ -15,6 +16,7 @@ pub async fn track_state(
     source_rpc: RpcConnection,
     storage_slot: U256,
     contract_address: String,
+    terminal_block: Option<u64>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
@@ -42,7 +44,9 @@ pub async fn track_state(
 
     let mut block_number = source_rpc.block_number().await?;
 	loop {
-        if interrupted.load(Ordering::SeqCst) {
+		// Crazy hamburger check
+		let has_reached_terminal_block = terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= *tb).unwrap_or(false);
+        if interrupted.load(Ordering::SeqCst) || has_reached_terminal_block {
             break;
         }
 
@@ -72,7 +76,7 @@ pub async fn track_state(
 	};
 
 	let path = format!("{}/{}", path, filename);
-	println!("Writing to file: {}", path);
+	println!("\nWriting to file: {}", path);
 	fs::write(path, json)?;
 
 	Ok(())
