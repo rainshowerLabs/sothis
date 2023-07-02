@@ -164,7 +164,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             track_state(source_rpc, storage_slot, contract_address, terminal_block).await?;
         }
         &_ => {
-            // handle this properly later
             panic!("Mode does not exist!");
         },
     }
