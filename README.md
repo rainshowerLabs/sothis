@@ -58,12 +58,12 @@ Historic mode is the default way to use sothis. Its used to replay state to a lo
 
 #### Usage
 
-- `-m historic`(optinal): Used to denote we are replaying in live mode.
+- `-m historic`(optional): Used to denote we are replaying in live mode.
 - `--source_rpc`: RPC of the node we are getting blocks from.
 - `--replay_rpc`: RPC of the node were sending blocks to.
 - `--terminal_block`: Final block sothis will replay.
 
-To stop replaying, terminate the process via Ctrl+C or however else you preffer.
+To stop replaying, terminate the process via Ctrl+C or however else you prefer.
 
 ```
 sothis --source_rpc {ARCHIVE_NODE} --replay_rpc http://localhost:8545 -m historic --terminal_block 9000022
@@ -79,7 +79,7 @@ Live mode is designed to be used with a forked local node, with its tip near the
 - `--source_rpc`: RPC of the node we are getting blocks from.
 - `--replay_rpc`: RPC of the node were sending blocks to.
 
-To stop replaying, terminate the process via Ctrl+C or however else you preffer.
+To stop replaying, terminate the process via Ctrl+C or however else you prefer.
 
 ```
 sothis --source_rpc {ARCHIVE_NODE} --replay_rpc http://localhost:8545 -m live
@@ -87,7 +87,7 @@ sothis --source_rpc {ARCHIVE_NODE} --replay_rpc http://localhost:8545 -m live
 
 ### Track
 
-The tracking mode is used to track the change in value of a storage slot for a contract. It can be used on a live production network, as well as in conjuntion with sothis (keep in mind that you can use the `--block_listen_time`!) . If you are testing on a local network, you can launch another instance of sothis to track the change of a slot on a replay node.   
+The tracking mode is used to track the change in value of a storage slot for a contract. It can be used on a live production network, as well as in conjunction with sothis (keep in mind that you can use the `--block_listen_time`!) . If you are testing on a local network, you can launch another instance of sothis to track the change of a slot on a replay node.   
 
 The result is saved to a JSON file that looks like this:
 ```json
@@ -124,8 +124,8 @@ Sothis is a rust crate. You can install it with cargo:
 
 ###  Why is sothis so slow?
 
-Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. It's recommended to use your own local node.       
-If using `anvil` make sure you add the `--cups {REALL_HIGH_VALUE}` arg so anvil doesn't throttle itself.
+Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. One indication the throttling is happening is when the evm_mine action takes a long time. It's recommended to use your own local node.
+If using `anvil` make sure you add the `--cups {REALLY_HIGH_VALUE}` arg so anvil doesn't throttle itself.
 
 ### I have a problem with sothis. Can devs do something?
 
@@ -133,7 +133,7 @@ Yes! Make a github issue detailing your problem.
 
 ### Why the name?
 
-Sothis is known as the creator and God of Fódlan in Fire Emblem: Thee Houses. She has the ability to rewind time at will.
+Sothis is known as the creator and God of Fódlan in Fire Emblem: Three Houses. She has the ability to rewind time at will.
 
 ## todo
 
