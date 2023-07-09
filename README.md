@@ -124,7 +124,7 @@ Sothis is a rust crate. You can install it with cargo:
 
 ###  Why is sothis so slow?
 
-Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. One indication the throttling is happening is when the evm_mine action takes a long time. It's recommended to use your own local node.
+Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. One indication the throttling is happening is when the `evm_mine` action takes a long time. If `anvil` is frozen on `evm_mine`, it may take 3-4 minutes to mine a single block but it will eventually finish. It's recommended to use your own local node.
 If using `anvil` make sure you add the `--cups {REALLY_HIGH_VALUE}` arg so anvil doesn't throttle itself.
 
 ### I have a problem with sothis. Can devs do something?
