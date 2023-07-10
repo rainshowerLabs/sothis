@@ -1,4 +1,3 @@
-use crate::APP_CONFIG;
 use crate::RpcConnection;
 use crate::rpc::format::hex_to_decimal;
 use crate::tracker::types::*;
@@ -17,6 +16,9 @@ pub async fn track_state(
     storage_slot: U256,
     contract_address: String,
     terminal_block: Option<u64>,
+    block_listen_time: u64,
+    path: String,
+    filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
@@ -30,17 +32,6 @@ pub async fn track_state(
 		storage_slot: storage_slot,
 		state_changes: Vec::new(),
 	};
-
-	// Release the lock immediately since we're gonna use it later
-    let block_time;
-    let path;
-    let filename;
-    {
-        let app_config = APP_CONFIG.lock()?;
-        block_time = app_config.block_listen_time;
-        path = app_config.path.clone();
-        filename = app_config.filename.clone();
-    }
 
     let mut block_number = source_rpc.block_number().await?;
 	loop {
@@ -63,7 +54,7 @@ pub async fn track_state(
 			storage.state_changes.push(slot);
 		}
 
-		block_number = source_rpc.listen_for_blocks(block_time).await?;
+		block_number = source_rpc.listen_for_blocks(block_listen_time).await?;
 	}
 	let json = serde_json::to_string(&storage)?;
 
