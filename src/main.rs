@@ -15,7 +15,7 @@ use rpc::rpc::RpcConnection;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("sothis")
-        .version("0.3.2")
+        .version("0.4.0")
         .author("makemake <vukasin@gostovic.me>")
         .about("Tool for replaying historical transactions. Designed to be used with anvil or hardhat.")
         .arg(Arg::new("source_rpc")
