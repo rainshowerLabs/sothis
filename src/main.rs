@@ -99,12 +99,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     match mode.as_str() {
         "historic" => {
             println!("Replaying in historic mode...");
-            
-            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
-            let terminal_block = format_number_input(&terminal_block);
-
+        
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
+
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let terminal_block = format_number_input(&terminal_block);
 
             let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
             let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
