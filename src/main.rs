@@ -137,7 +137,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            replay_historic_blocks(source_rpc, replay_rpc, hex_to_decimal(&terminal_block)?).await?;
+            let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
+            let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
+            let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
+            let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
+
+            replay_historic_blocks(
+                source_rpc,
+                replay_rpc,
+                hex_to_decimal(&terminal_block)?,
+                replay_delay,
+                entropy_threshold,
+                exit_on_tx_fail,
+                send_as_raw,
+            ).await?;
         },
         "live" => {
             println!("Replaying live blocks...");
@@ -145,7 +158,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            replay_live(replay_rpc, source_rpc).await?;
+            let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
+            let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
+            let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
+            let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
+            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+
+            replay_live(
+                source_rpc,
+                replay_rpc,
+                replay_delay,
+                block_listen_time,
+                entropy_threshold,
+                exit_on_tx_fail,
+                send_as_raw,
+            ).await?;
         }
         "track" => {
             println!("Tracking state variable...");
