@@ -244,8 +244,8 @@ impl RpcConnection {
             // Add this as a *heartbeat* so users are less confused if nothing is happening
             let elapsed_time = start_time.elapsed();
 
-            if elapsed_time >= Duration::from_secs(60) {
-                println!("!!! \x1b[93mNo new blocks have been detected in 60 seconds! Check your node(s)\x1b[0m !!!");
+            if elapsed_time >= Duration::from_secs(20) {
+                println!("!!! \x1b[93mNo new blocks have been detected in 20 seconds! Check your node(s)\x1b[0m !!!");
                 println!("Still listening...");
                 start_time = Instant::now();
             }
