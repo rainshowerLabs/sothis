@@ -122,13 +122,26 @@ impl RpcConnection {
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
 
-    // Sends raw transaction
+    // Gets storage at address and slot for the latest block
     pub async fn get_storage_at(
         &self,
         address: String,
         slot: U256,
     ) -> Result<String, RequestError> {
         let params = json!([address, slot, "latest"]);
+        let result = self.send_request("eth_getStorageAt", params).await?;
+
+        Ok(result.trim_matches('\"').to_string())
+    }
+
+    // Gets storage at address and slot for a block specified in th argument
+    pub async fn get_storage_at_block(
+        &self,
+        address: String,
+        slot: U256,
+        block: String,
+    ) -> Result<String, RequestError> {
+        let params = json!([address, slot, block]);
         let result = self.send_request("eth_getStorageAt", params).await?;
 
         Ok(result.trim_matches('\"').to_string())
