@@ -246,6 +246,7 @@ impl RpcConnection {
 
             if elapsed_time >= Duration::from_secs(20) {
                 println!("!!! \x1b[93mNo new blocks have been detected in 20 seconds! Check your node(s)\x1b[0m !!!");
+                println!("If your node is stuck at `evm_mine` this means its querrying state needed to replay.");
                 println!("Still listening...");
                 start_time = Instant::now();
             }
