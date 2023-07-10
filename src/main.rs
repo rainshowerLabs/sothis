@@ -8,6 +8,7 @@ use ethers::types::U256;
 use crate::replay::replay::replay_historic_blocks;
 use crate::replay::replay::replay_live;
 use crate::tracker::tracker::track_state;
+use crate::tracker::tracker::fast_track_state;
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
@@ -40,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .short('m')
             .num_args(1..)
             .default_value("historic")
-            .help("Choose between live, historic replay, or tracking"))
+            .help("Choose between live, historic, track, or fast_track"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(0..)
@@ -142,7 +143,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 exit_on_tx_fail,
                 send_as_raw,
             ).await?;
-        }
+        },
         "track" => {
             println!("Tracking state variable...");
             println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
@@ -163,6 +164,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let filename = matches.get_one::<String>("filename").expect("required").to_string();
 
             track_state(
+                source_rpc,
+                storage_slot,
+                contract_address,
+                terminal_block,
+                block_listen_time,
+                path,
+                filename,
+            ).await?;
+        },
+        "fast_track" => {
+            println!("Tracking state variable...");
+            println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
+            
+            let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
+            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
+            let storage_slot = U256::from_dec_str(&storage_slot)?;
+            
+            // If terminal_block is set by the user use that, otherwise have it be none
+            let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            
+            if terminal_block == None {
+                println!("No terminal block set, tracking indefinitely.");
+            }
+
+            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+            let path = matches.get_one::<String>("path").expect("required").to_string();
+            let filename = matches.get_one::<String>("filename").expect("required").to_string();
+
+            fast_track_state(
                 source_rpc,
                 storage_slot,
                 contract_address,
