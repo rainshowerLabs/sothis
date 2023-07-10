@@ -3,8 +3,6 @@ mod replay;
 mod tracker;
 
 use clap::{Command, Arg};
-use std::sync::Mutex;
-use lazy_static::lazy_static;
 use ethers::types::U256;
 
 use crate::replay::replay::replay_historic_blocks;
@@ -13,22 +11,6 @@ use crate::tracker::tracker::track_state;
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
-
-// Settings flags
-#[derive(Default)]
-pub struct AppConfig {
-    exit_on_tx_fail: bool,
-    send_as_raw: bool,
-    entropy_threshold: f32,
-    replay_delay: u64,
-    block_listen_time: u64,
-    path: String,
-    filename: String,
-}
-
-lazy_static! {
-    static ref APP_CONFIG: Mutex<AppConfig> = Mutex::new(AppConfig::default());
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -111,22 +93,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches();
 
     let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
-    let mode: String = matches.get_one::<String>("mode").expect("required").to_string();
-
-    // Set settings
-    {
-        let mut app_config = APP_CONFIG.lock()?;
-        app_config.exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
-        app_config.send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
-        app_config.entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
-        app_config.replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
-        app_config.block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
-        app_config.path = matches.get_one::<String>("path").expect("required").to_string();
-        app_config.filename = matches.get_one::<String>("filename").expect("required").to_string();
-    }
-
     let source_rpc = RpcConnection::new(source_rpc);
-    
+
+    let mode: String = matches.get_one::<String>("mode").expect("required").to_string();    
     match mode.as_str() {
         "historic" => {
             println!("Replaying in historic mode...");
@@ -189,7 +158,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("No terminal block set, tracking indefinitely.");
             }
 
-            track_state(source_rpc, storage_slot, contract_address, terminal_block).await?;
+            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+            let path = matches.get_one::<String>("path").expect("required").to_string();
+            let filename = matches.get_one::<String>("filename").expect("required").to_string();
+
+            track_state(
+                source_rpc,
+                storage_slot,
+                contract_address,
+                terminal_block,
+                block_listen_time,
+                path,
+                filename,
+            ).await?;
         }
         &_ => {
             panic!("Mode does not exist!");
