@@ -215,6 +215,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             panic!("Mode does not exist!");
         },
     }
-    
+
     Ok(())
 }
