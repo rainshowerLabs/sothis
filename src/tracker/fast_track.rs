@@ -33,9 +33,9 @@ pub async fn fast_track_state(
 		state_changes: Vec::new(),
 	};
 
+	let terminal_block = terminal_block.unwrap_or(hex_to_decimal(&source_rpc.block_number().await?)?);
 
-
-	while origin_block < terminal_block.unwrap_or(hex_to_decimal(&source_rpc.block_number().await?)?) {
+	while origin_block < terminal_block {
         if interrupted.load(Ordering::SeqCst) {
             break;
         }

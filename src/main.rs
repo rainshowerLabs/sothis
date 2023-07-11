@@ -8,7 +8,7 @@ use ethers::types::U256;
 use crate::replay::replay::replay_historic_blocks;
 use crate::replay::replay::replay_live;
 use crate::tracker::tracker::track_state;
-use crate::tracker::tracker::fast_track_state;
+use crate::tracker::fast_track::fast_track_state;
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
@@ -174,7 +174,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ).await?;
         },
         "fast_track" => {
-            println!("Tracking state variable...");
+            println!("Fast tracking state variable...");
             println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
             
             let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
@@ -185,7 +185,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             
             if terminal_block == None {
-                println!("No terminal block set, tracking indefinitely.");
+                // print block and newline later when we get the block number so it looks nice
+                print!("No terminal block set, tracking until the current head...");
             }
 
             let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
