@@ -35,6 +35,11 @@ pub async fn fast_track_state(
 
 	let terminal_block = terminal_block.unwrap_or(hex_to_decimal(&source_rpc.block_number().await?)?);
 
+	// Error out if the origin block is >= than the terminal
+	if origin_block >= terminal_block {
+		return Err("Origin block cannot be less than the terminal block".into());
+	}
+
 	while origin_block < terminal_block {
         if interrupted.load(Ordering::SeqCst) {
             break;
