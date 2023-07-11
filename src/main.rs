@@ -194,7 +194,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             if terminal_block == None {
                 // print block and newline later when we get the block number so it looks nice
-                print!("No terminal block set, tracking until the current head...");
+                println!("No terminal block set, tracking until the current head...");
             }
 
             let origin_block = matches.get_one::<String>("origin_block").expect("required").parse::<u64>()?;
