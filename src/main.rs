@@ -72,13 +72,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .short('c')
             .num_args(1..)
             .required_if_eq("mode", "track")
+            .required_if_eq("mode", "fast_track")
             .help("Address of the contract we're tracking storage."))
         .arg(Arg::new("storage_slot")
             .long("storage_slot")
             .short('l')
             .num_args(1..)
             .required_if_eq("mode", "track")
+            .required_if_eq("mode", "fast_track")
             .help("Storage slot for the variable we're tracking"))
+        .arg(Arg::new("origin_block")
+            .long("origin_block")
+            .short('0')
+            .num_args(1..)
+            .required_if_eq("mode", "fast_track")
+            .help("First block sothis will look at."))
         .arg(Arg::new("path")
             .long("path")
             .short('p')
@@ -189,7 +197,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 print!("No terminal block set, tracking until the current head...");
             }
 
-            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+            let origin_block = matches.get_one::<String>("origin_block").expect("required").parse::<u64>()?;
             let path = matches.get_one::<String>("path").expect("required").to_string();
             let filename = matches.get_one::<String>("filename").expect("required").to_string();
 
@@ -198,7 +206,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 storage_slot,
                 contract_address,
                 terminal_block,
-                block_listen_time,
+                origin_block,
                 path,
                 filename,
             ).await?;
