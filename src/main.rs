@@ -192,11 +192,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // If terminal_block is set by the user use that, otherwise have it be none
             let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             
-            if terminal_block == None {
-                // print block and newline later when we get the block number so it looks nice
-                println!("No terminal block set, tracking until the current head...");
-            }
-
             let origin_block = matches.get_one::<String>("origin_block").expect("required").parse::<u64>()?;
             let path = matches.get_one::<String>("path").expect("required").to_string();
             let filename = matches.get_one::<String>("filename").expect("required").to_string();
