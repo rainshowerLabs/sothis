@@ -44,7 +44,7 @@ pub async fn fast_track_state(
 
 	// Error out if the origin block is >= than the terminal
 	if origin_block >= terminal_block {
-		return Err("Origin block cannot be less than the terminal block".into());
+		return Err("Origin block cannot be higher than the terminal block".into());
 	}
 
 	let mut current_block = origin_block;
