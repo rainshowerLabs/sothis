@@ -36,9 +36,8 @@ pub async fn fast_track_state(
 	let terminal_block = match terminal_block.is_some() {
 		true => terminal_block.unwrap(),
 		false => {
-			print!("No terminal block set, setting terminal block to current head: ");
 			let a = hex_to_decimal(&source_rpc.block_number().await?)?;
-			println!("{}", a);
+			println!("No terminal block set, setting terminal block to current head: {}", a);
 			a
 		},
 	};
