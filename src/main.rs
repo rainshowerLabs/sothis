@@ -7,8 +7,11 @@ use ethers::types::U256;
 
 use crate::replay::replay::replay_historic_blocks;
 use crate::replay::replay::replay_live;
+use crate::replay::setup::contract_setup;
+
 use crate::tracker::tracker::track_state;
 use crate::tracker::fast_track::fast_track_state;
+
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
 use rpc::rpc::RpcConnection;
@@ -67,6 +70,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("send_as_raw")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
+        .arg(Arg::new("no_setup")
+            .long("no_setup")
+            .num_args(0..)
+            .help("Start replaying immediately."))
         .arg(Arg::new("contract_address")
             .long("contract_address")
             .short('c')
@@ -120,6 +127,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
             let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
 
+            let no_setup = matches.get_occurrences::<String>("no_setup").is_some();
+            if !no_setup {
+                contract_setup(replay_rpc.clone()).await?;
+            }
+
             replay_historic_blocks(
                 source_rpc,
                 replay_rpc,
@@ -141,6 +153,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
             let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
             let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+
+            let no_setup = matches.get_occurrences::<String>("no_setup").is_some();
+            if !no_setup {
+                contract_setup(replay_rpc.clone()).await?;
+            }
 
             replay_live(
                 source_rpc,
