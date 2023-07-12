@@ -16,7 +16,7 @@ pub async fn fast_track_state(
     storage_slot: U256,
     contract_address: String,
     terminal_block: Option<u64>,
-    mut origin_block: u64,
+    origin_block: u64,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -33,21 +33,31 @@ pub async fn fast_track_state(
 		state_changes: Vec::new(),
 	};
 
-	let terminal_block = terminal_block.unwrap_or(hex_to_decimal(&source_rpc.block_number().await?)?);
+	let terminal_block = match terminal_block.is_some() {
+		true => terminal_block.unwrap(),
+		false => {
+			print!("No terminal block set, setting terminal block to: ");
+			let a = hex_to_decimal(&source_rpc.block_number().await?)?;
+			println!("{}", a);
+			a
+		},
+	};
 
 	// Error out if the origin block is >= than the terminal
 	if origin_block >= terminal_block {
 		return Err("Origin block cannot be less than the terminal block".into());
 	}
 
-	while origin_block < terminal_block {
+	let mut current_block = origin_block;
+
+	while current_block < terminal_block {
         if interrupted.load(Ordering::SeqCst) {
             break;
         }
 		
-		let latest_slot = source_rpc.get_storage_at_block(contract_address.clone(), storage_slot.clone(), decimal_to_hex(origin_block)).await?;
+		let latest_slot = source_rpc.get_storage_at_block(contract_address.clone(), storage_slot.clone(), decimal_to_hex(current_block)).await?;
 		let slot = StateChange {
-			block_number: origin_block.into(),
+			block_number: current_block.into(),
 			value: latest_slot,
 		};
 
@@ -56,7 +66,7 @@ pub async fn fast_track_state(
 			storage.state_changes.push(slot);
 		}
 
-		origin_block += 1;
+		current_block += 1;
 	}
 	
 	let json = serde_json::to_string(&storage)?;
