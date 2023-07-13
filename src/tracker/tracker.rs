@@ -50,7 +50,7 @@ pub async fn track_state(
 		};
 
 		if storage.state_changes.last().map(|change| change.value != slot.value).unwrap_or(true) {
-			println!("New storage slot value: {:?}", &slot.value);
+			println!("New storage slot value at block {}: {:?}", slot.block_number, &slot.value);
 			storage.state_changes.push(slot);
 		}
 
