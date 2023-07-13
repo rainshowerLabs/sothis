@@ -28,12 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .required(true)
             .help("HTTP JSON-RPC of the node we're querying data from"))
-        .arg(Arg::new("terminal_block")
-            .long("terminal_block")
-            .short('b')
-            .num_args(1..)
-            .required_if_eq("mode", "historic")
-            .help("Block we're replaying until"))
         .arg(Arg::new("replay_rpc")
             .long("replay_rpc")
             .short('r')
@@ -45,6 +39,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .default_value("historic")
             .help("Choose between live, historic, track, or fast_track"))
+        .arg(Arg::new("terminal_block")
+            .long("terminal_block")
+            .short('b')
+            .num_args(1..)
+            .required_if_eq("mode", "historic")
+            .help("Block we're replaying until"))
         .arg(Arg::new("exit_on_tx_fail")
             .long("exit_on_tx_fail")
             .num_args(0..)
@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("required").to_string();
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("No valid --terminal_block set!").to_string();
             let terminal_block = format_number_input(&terminal_block);
 
             let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
