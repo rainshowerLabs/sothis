@@ -76,10 +76,8 @@ impl Transaction {
         let encoded;
         // if access list exists we need the typed transaction to be an eip1559 one
         if self.maxFeePerGas.is_some() {
-            println!("EIP1559");
             encoded = self.rlp_serialize_eip1559(chain_id)?;
         } else {
-            println!("LEGACY");
             encoded = self.rlp_serialize_legacy(chain_id)?;
         }
 
