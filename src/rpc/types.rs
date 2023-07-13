@@ -1,4 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize,};
+use serde_json::Value;
+
 use ethers::utils::hex;
 use ethers::types::H160;
 
@@ -41,11 +43,15 @@ pub struct BlockResult {
 pub struct Transaction {
     pub blockHash: String,
     pub blockNumber: String,
+    pub hash: String,
+    pub access_list: Option<Vec<Value>>,
+    pub chainId: Option<String>,
     pub from: String,
     pub gas: String,
     pub gasPrice: String,
-    pub hash: String,
     pub input: String, // or data
+    pub max_fee_per_gas: Option<String>,
+    pub max_priority_fee_per_gas: Option<String>,
     pub nonce: String,
     pub r: String,
     pub s: String,
