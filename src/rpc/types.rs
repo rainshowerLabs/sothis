@@ -73,13 +73,14 @@ impl Transaction {
         &self,
         chain_id: u64,
     ) -> Result<String, Box<dyn std::error::Error>> {
-
         let encoded;
         // if access list exists we need the typed transaction to be an eip1559 one
-        if self.accessList.is_some() {
+        if self.maxFeePerGas.is_some() {
             encoded = self.rlp_serialize_eip1559(chain_id)?;
+            println!("EIP1559");
         } else {
             encoded = self.rlp_serialize_legacy(chain_id)?;
+            println!("LEGACY");
         }
 
         //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
