@@ -145,14 +145,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "live" => {
             println!("Replaying live blocks...");
 
-            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("Invalid replay_rpc supplied!").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
+            let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("Invalid entropy_threshold").parse::<f32>()?;
             let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
             let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
-            let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
-            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+            let replay_delay = matches.get_one::<String>("replay_delay").expect("Invalid replay_delay").parse::<u64>()?;
+            let block_listen_time = matches.get_one::<String>("block_listen_time").expect("Invalid block_listen_time").parse::<u64>()?;
 
             let no_setup = matches.get_occurrences::<String>("no_setup").is_some();
             if !no_setup {
@@ -173,8 +173,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Tracking state variable...");
             println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
             
-            let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
-            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
+            let contract_address: String = matches.get_one::<String>("contract_address").expect("Invalid contract_address").to_string();
+            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("Invalid storage_slot").to_string();
             let storage_slot = U256::from_dec_str(&storage_slot)?;
             
             // If terminal_block is set by the user use that, otherwise have it be none
@@ -202,16 +202,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Fast tracking state variable...");
             println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
             
-            let contract_address: String = matches.get_one::<String>("contract_address").expect("required").to_string();
-            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("required").to_string();
+            let contract_address: String = matches.get_one::<String>("contract_address").expect("Invalid contract_address").to_string();
+            let storage_slot: String = matches.get_one::<String>("storage_slot").expect("Invalid storage_slot").to_string();
             let storage_slot = U256::from_dec_str(&storage_slot)?;
             
             // If terminal_block is set by the user use that, otherwise have it be none
             let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             
-            let origin_block = matches.get_one::<String>("origin_block").expect("required").parse::<u64>()?;
-            let path = matches.get_one::<String>("path").expect("required").to_string();
-            let filename = matches.get_one::<String>("filename").expect("required").to_string();
+            let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
+            let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
+            let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
             fast_track_state(
                 source_rpc,
