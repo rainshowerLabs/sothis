@@ -96,7 +96,7 @@ impl Transaction {
             to: Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
             gas: Some(U256::from_dec_str(&self.gas)?),
             value: Some(U256::from_dec_str(&self.value)?),
-            data: Some(Bytes::from(hex::decode(&self.input)?)), // ?????
+            data: Some(Bytes::from(hex::decode(&self.input.trim_start_matches("0x"))?)), // ?????
             nonce: Some(U256::from_dec_str(&self.nonce)?),
             access_list: AccessList::default(), // TODO: make this not-default later. its optional so who cares for now
             max_priority_fee_per_gas: Some(U256::from_dec_str(&self.maxPriorityFeePerGas.clone().unwrap())?),
