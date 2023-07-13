@@ -44,14 +44,14 @@ pub struct Transaction {
     pub blockHash: String,
     pub blockNumber: String,
     pub hash: String,
-    pub access_list: Option<Vec<Value>>,
+    pub accessList: Option<Vec<Value>>,
     pub chainId: Option<String>,
     pub from: String,
     pub gas: String,
     pub gasPrice: String,
     pub input: String, // or data
-    pub max_fee_per_gas: Option<String>,
-    pub max_priority_fee_per_gas: Option<String>,
+    pub maxFeePerGas: Option<String>,
+    pub maxPriorityFeePerGas: Option<String>,
     pub nonce: String,
     pub r: String,
     pub s: String,
@@ -68,19 +68,15 @@ impl Transaction {
         &mut self,
         chain_id: u64,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        // To have this work, we need to RLP encode tx params.
-        // 0) `nonce`
-        // 1) `gas_price`
-        // 2) `gas_limit`
-        // 3) `to`
-        // 4) `value`
-        // 5) `data`
-        // 6) `v`
-        // 7) `r`
-        // 8) `s`
 
-        // features set to legacy, this is a legacy tx
-        let mut typed_tx: TypedTransaction = Default::default();
+        // if access list exists we need the typed transaction to be an eip1559 one
+        let mut typed_tx;
+        if self.accessList.is_some() {
+            typed_tx = TypedTransaction::Eip1559(/* Eip1559TransactionRequest */);
+        } else {
+            typed_tx = Default::default();
+        }
+        
 
         match self.to {
             Some(_) => {
@@ -137,6 +133,7 @@ impl Transaction {
         //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(encoded)
     }
+
 }
 
 
