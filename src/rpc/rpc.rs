@@ -122,13 +122,26 @@ impl RpcConnection {
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
 
-    // Sends raw transaction
+    // Gets storage at address and slot for the latest block
     pub async fn get_storage_at(
         &self,
         address: String,
         slot: U256,
     ) -> Result<String, RequestError> {
         let params = json!([address, slot, "latest"]);
+        let result = self.send_request("eth_getStorageAt", params).await?;
+
+        Ok(result.trim_matches('\"').to_string())
+    }
+
+    // Gets storage at address and slot for a block specified in th argument
+    pub async fn get_storage_at_block(
+        &self,
+        address: String,
+        slot: U256,
+        block: String,
+    ) -> Result<String, RequestError> {
+        let params = json!([address, slot, block]);
         let result = self.send_request("eth_getStorageAt", params).await?;
 
         Ok(result.trim_matches('\"').to_string())
@@ -149,7 +162,7 @@ impl RpcConnection {
         tx: Transaction,
         chain_id: u64,
     ) -> Result<String, RequestError> {
-        let mut tx = tx.clone();
+        let tx = tx.clone();
 
         let params = tx.rlp_serialize_tx(chain_id)?;
         let params = json!([params]);
@@ -244,8 +257,9 @@ impl RpcConnection {
             // Add this as a *heartbeat* so users are less confused if nothing is happening
             let elapsed_time = start_time.elapsed();
 
-            if elapsed_time >= Duration::from_secs(60) {
-                println!("!!! \x1b[93mNo new blocks have been detected in 60 seconds! Check your node(s)\x1b[0m !!!");
+            if elapsed_time >= Duration::from_secs(20) {
+                println!("!!! \x1b[93mNo new blocks have been detected in 20 seconds! Check your node(s)\x1b[0m !!!");
+                println!("If your node is stuck at `evm_mine` this means its querrying state needed to replay.");
                 println!("Still listening...");
                 start_time = Instant::now();
             }

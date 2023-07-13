@@ -1,5 +1,5 @@
 use crate::RpcConnection;
-use crate::rpc::format::hex_to_decimal;
+use crate::rpc::format::{hex_to_decimal, decimal_to_hex};
 use crate::tracker::types::*;
 use crate::tracker::time::get_latest_unix_timestamp;
 
@@ -10,13 +10,13 @@ use std::fs;
 use ctrlc;
 use ethers::types::U256;
 
-// We listen for new blocks and get the storage slot value if changed.
-pub async fn track_state(
+// We querry historical storage from a node instead of waiting for new blocks.
+pub async fn fast_track_state(
     source_rpc: RpcConnection,
     storage_slot: U256,
     contract_address: String,
     terminal_block: Option<u64>,
-    block_listen_time: u64,
+    origin_block: u64,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -33,19 +33,30 @@ pub async fn track_state(
 		state_changes: Vec::new(),
 	};
 
-    let mut block_number = source_rpc.block_number().await?;
-	loop {
-		// Crazy hamburger check
-		let has_reached_terminal_block = terminal_block.as_ref().map(|tb| hex_to_decimal(&block_number).unwrap() >= *tb).unwrap_or(false);
-        if interrupted.load(Ordering::SeqCst) || has_reached_terminal_block {
+	let terminal_block = match terminal_block.is_some() {
+		true => terminal_block.unwrap(),
+		false => {
+			let a = hex_to_decimal(&source_rpc.block_number().await?)?;
+			println!("No terminal block set, setting terminal block to current head: {}", a);
+			a
+		},
+	};
+
+	// Error out if the origin block is >= than the terminal
+	if origin_block >= terminal_block {
+		return Err("Origin block cannot be higher than the terminal block".into());
+	}
+
+	let mut current_block = origin_block;
+
+	while current_block < terminal_block {
+        if interrupted.load(Ordering::SeqCst) {
             break;
         }
-
-		let block_number_u256: U256 = block_number.parse()?;
-		let latest_slot = source_rpc.get_storage_at(contract_address.clone(), storage_slot.clone()).await?;
-
+		
+		let latest_slot = source_rpc.get_storage_at_block(contract_address.clone(), storage_slot.clone(), decimal_to_hex(current_block)).await?;
 		let slot = StateChange {
-			block_number: block_number_u256,
+			block_number: current_block.into(),
 			value: latest_slot,
 		};
 
@@ -54,8 +65,9 @@ pub async fn track_state(
 			storage.state_changes.push(slot);
 		}
 
-		block_number = source_rpc.listen_for_blocks(block_listen_time).await?;
+		current_block += 1;
 	}
+	
 	let json = serde_json::to_string(&storage)?;
 
 	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one

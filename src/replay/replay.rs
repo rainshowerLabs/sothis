@@ -1,7 +1,6 @@
 use std::thread::sleep;
 use tokio::time::Duration;
 
-use crate::APP_CONFIG;
 use crate::replay::send_transaction::send_transactions;
 use crate::RpcConnection;
 use crate::rpc::format::*;
@@ -20,6 +19,10 @@ pub async fn replay_historic_blocks(
     source_rpc: RpcConnection,
     replay_rpc: RpcConnection,
     until: u64,
+    replay_delay: u64,
+    entropy_threshold: f32,
+    exit_on_tx_fail: bool,
+    send_as_raw: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // make sure that both rpcs have the same chainid to satisfy the replay thingy
     let historical_chainid = source_rpc.chain_id().await?;
@@ -39,13 +42,6 @@ pub async fn replay_historic_blocks(
     replay_rpc.evm_set_automine(false).await?;
     // set insanely high interval for the blocks
     replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
-
-    // Get the time we're delaying the replay for
-    let replay_delay;
-    {
-        let app_config = APP_CONFIG.lock()?;
-        replay_delay = app_config.replay_delay;
-    }
     
     loop {
         // we write a bit of illegible code
@@ -58,12 +54,19 @@ pub async fn replay_historic_blocks(
         let historical_txs = historical_block.transactions;
 
         // send transactions to mempool
-        send_transactions(replay_rpc.clone(), historical_txs, hex_to_decimal(&replay_chainid)?).await?;
+        send_transactions(
+            replay_rpc.clone(),
+            historical_txs,
+            hex_to_decimal(&replay_chainid)?,
+            entropy_threshold,
+            exit_on_tx_fail,
+            send_as_raw,
+        ).await?;
 
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
             hex_to_decimal(&historical_block.timestamp)?
-            ).await?;
+        ).await?;
 
         // mine the block
         replay_rpc.evm_mine().await?;
@@ -88,20 +91,28 @@ pub async fn replay_historic_blocks(
 // 3) Repeat from 2.
 #[allow(dead_code, unused_variables)]
 pub async fn replay_live(
-    replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
+    replay_rpc: RpcConnection,
+    replay_delay: u64,
+    block_listen_time: u64,
+    entropy_threshold: f32,
+    exit_on_tx_fail: bool,
+    send_as_raw: bool,
     ) -> Result<(), Box<dyn std::error::Error>> {
-    let block_time;
-    {
-        let app_config = APP_CONFIG.lock()?;
-        block_time = app_config.block_listen_time;
-    }
-
     loop {
-        let latest_block = source_rpc.listen_for_blocks(block_time).await?;
+        let latest_block = source_rpc.listen_for_blocks(block_listen_time).await?;
         if latest_block != replay_rpc.block_number().await? {
             println!("New block detected, replaying...");
-            replay_historic_blocks(source_rpc.clone(), replay_rpc.clone(), hex_to_decimal(&latest_block)?).await?;
+            replay_historic_blocks(
+                source_rpc.clone(),
+                replay_rpc.clone(),
+                hex_to_decimal(&latest_block)?,
+                replay_delay,
+                entropy_threshold,
+                exit_on_tx_fail,
+                send_as_raw,
+
+                ).await?;
         }
     }
 }

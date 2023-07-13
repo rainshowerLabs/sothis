@@ -1,9 +1,16 @@
-use serde::{Deserialize, Serialize};
+use ethers::types::transaction::eip2930::AccessList;
+use serde::{Deserialize, Serialize,};
+use serde_json::Value;
+
 use ethers::utils::hex;
-use ethers::types::H160;
+use ethers::types::{
+    H160,
+    Bytes,
+    Eip1559TransactionRequest,
+    TransactionRequest,
+};
 
 use std::str::FromStr;
-use std::borrow::Cow;
 
 use ethers::types::transaction::eip2718::TypedTransaction;
 use ethers::types::Signature;
@@ -41,11 +48,15 @@ pub struct BlockResult {
 pub struct Transaction {
     pub blockHash: String,
     pub blockNumber: String,
+    pub hash: String,
+    pub accessList: Option<Vec<Value>>,
+    pub chainId: Option<String>,
     pub from: String,
     pub gas: String,
     pub gasPrice: String,
-    pub hash: String,
     pub input: String, // or data
+    pub maxFeePerGas: Option<String>,
+    pub maxPriorityFeePerGas: Option<String>,
     pub nonce: String,
     pub r: String,
     pub s: String,
@@ -59,55 +70,85 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn rlp_serialize_tx(
-        &mut self,
+        &self,
         chain_id: u64,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        // To have this work, we need to RLP encode tx params.
-        // 0) `nonce`
-        // 1) `gas_price`
-        // 2) `gas_limit`
-        // 3) `to`
-        // 4) `value`
-        // 5) `data`
-        // 6) `v`
-        // 7) `r`
-        // 8) `s`
+        let encoded;
+        // if access list exists we need the typed transaction to be an eip1559 one
+        if self.maxFeePerGas.is_some() {
+            encoded = self.rlp_serialize_eip1559(chain_id)?;
+        } else {
+            encoded = self.rlp_serialize_legacy(chain_id)?;
+        }
 
-        // features set to legacy, this is a legacy tx
-        let mut typed_tx: TypedTransaction = Default::default();
+        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
+        Ok(encoded)
+    }
 
-        match self.to {
-            Some(_) => {
-                let address = H160::from_str(&self.to.clone().expect("Can't read `to` field"));
-                typed_tx.set_to(address?);
-            },
-            None => (),
+    fn rlp_serialize_eip1559(
+        &self,
+        chain_id: u64,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let to = match &self.to {
+            Some(_) => Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
+            None => None,
         };
 
-        // This way of dealing with the borrow checker is probably not good but fuck it we ball
+        let transaction = Eip1559TransactionRequest {
+            from: Some(H160::from_str(&self.from).unwrap()),
+            to: to,
+            gas: Some(U256::from_str(&self.gas)?),
+            value: Some(U256::from_str(&self.value)?),
+            data: Some(Bytes::from(hex::decode(&self.input.trim_start_matches("0x"))?)), // ?????
+            nonce: Some(U256::from_str(&self.nonce)?),
+            access_list: AccessList::default(), // TODO: make this not-default later. its optional so who cares for now
+            max_priority_fee_per_gas: Some(U256::from_str(&self.maxPriorityFeePerGas.clone().unwrap())?),
+            max_fee_per_gas: Some(U256::from_str(&self.maxFeePerGas.clone().unwrap())?),
+            chain_id: Some(chain_id.into()),
+        };
 
-        let nonce: U256 = Cow::Borrowed(&self.nonce).parse()?;
-        typed_tx.set_nonce(nonce);
+        let typed_tx = TypedTransaction::Eip1559(transaction);
 
-        let value: U256 = Cow::Borrowed(&self.value.as_str()).parse()?;
-        typed_tx.set_value(value);
+        // convert r and s to U256
+        // convert v to U64
+        // r, s and v are str's. it doesnt matter too much performance wise that we
+        // are converting it here since we are only using it here
+        let r: U256 = U256::from_str(&self.r)?;
+        let s: U256 = U256::from_str(&self.s)?;
+        let v: u64 = hex_to_decimal(&self.v)?;
 
-        let gas_price: U256 = Cow::Borrowed(&self.gasPrice).parse()?;
-        typed_tx.set_gas_price(gas_price);
+        // create a new use ethers::types::Signature with the r, s, and v values
+        let sig: Signature = Signature {
+            r, // as U256
+            s, // as U256
+            v, // as U64
+        };
 
-        let gas: U256 = Cow::Borrowed(&self.gas).parse()?;
-        typed_tx.set_gas(gas);
+        Ok(hex::encode(typed_tx.rlp_signed(&sig)))
+    }
 
-        typed_tx.set_chain_id(chain_id);
+    fn rlp_serialize_legacy(
+        &self,
+        chain_id: u64,
+    ) -> Result<String, Box<dyn std::error::Error>> {
 
-        // We need to convert `self.input` to Bytes first to set the data
+        let to = match &self.to {
+            Some(_) => Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
+            None => None,
+        };
 
-        // Remove 0x prefix from input if present
-        let input = self.input.trim_start_matches("0x");
+        let transaction = TransactionRequest {
+            from: Some(H160::from_str(&self.from).unwrap()),
+            to: to,
+            gas: Some(U256::from_str(&self.gas)?),
+            gas_price: Some(U256::from_str(&self.gasPrice)?),
+            value: Some(U256::from_str(&self.value)?),
+            data: Some(Bytes::from(hex::decode(&self.input.trim_start_matches("0x"))?)),
+            nonce: Some(U256::from_str(&self.nonce)?),
+            chain_id: Some(chain_id.into()),
+        };
 
-        let input = hex::decode(input)?;
-        let input: ethers::types::Bytes = input.into();
-        typed_tx.set_data(input);
+        let typed_tx = TypedTransaction::Legacy(transaction);
 
         // convert r and s to U256
         // convert v to U64
@@ -128,7 +169,6 @@ impl Transaction {
         // Add 0x prefix to encoded tx
         let encoded = format!("0x{}", encoded);
 
-        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(encoded)
     }
 }

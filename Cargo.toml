@@ -1,6 +1,6 @@
 [package]
 name = "sothis"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 authors = ["makemake <vukasin@gostovic.me>"]
 license = "GPL-3.0-or-later"
@@ -15,11 +15,8 @@ categories = ["command-line-utilities"]
 [dependencies]
 clap = "4.3.0"
 ctrlc = "3.4.0"
-env = "0.0.0"
 ethers = {version = "2.0.7", features = ["legacy"]}
-lazy_static = "1.4.0"
 reqwest = { version = "0.11.18", features = ["blocking", "json"] }
-rlp = "0.5.2"
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 tokio = { version = "1.28.1", features = ["full"] }
