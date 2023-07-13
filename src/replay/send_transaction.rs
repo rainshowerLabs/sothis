@@ -4,11 +4,11 @@ use crate::rpc::types::Transaction;
 
 // Abstract over the return types of send functions
 impl RpcConnection {
-    async fn send(&self, tx: Transaction, chain_id: u64, send_as_raw: bool) -> Result<String, RequestError> {
-        if send_as_raw {
-            self.send_raw_transaction(tx, chain_id).await
-        } else {
+    async fn send(&self, tx: Transaction, chain_id: u64, send_as_unsigned: bool) -> Result<String, RequestError> {
+        if send_as_unsigned {
             self.send_unsigned_transaction(tx, chain_id).await
+        } else {
+            self.send_raw_transaction(tx, chain_id).await
         }
     }
 }
@@ -20,7 +20,7 @@ pub async fn send_transactions(
     chain_id: u64,
     entropy_threshold: f32,
     exit_on_tx_fail: bool,
-    send_as_raw: bool,
+    send_as_unsigned: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_amount = historical_txs.len() as f32;
@@ -28,7 +28,7 @@ pub async fn send_transactions(
 
     for tx in historical_txs {
         // Gracefully handle errors so execution doesn't halt on error
-        match replay_rpc.send(tx, chain_id, send_as_raw).await {
+        match replay_rpc.send(tx, chain_id, send_as_unsigned).await {
             Ok(_) => (),
             Err(e) => if exit_on_tx_fail {
                 return Err(e.into());

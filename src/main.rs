@@ -66,8 +66,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .default_value("0")
             .help("Default delay for block replay in ms"))
-        .arg(Arg::new("send_as_raw")
-            .long("send_as_raw")
+        .arg(Arg::new("send_as_unsigned")
+            .long("send_as_unsigned")
             .num_args(0..)
             .help("Exit the program if a transaction fails"))
         .arg(Arg::new("no_setup")
@@ -124,7 +124,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
             let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
-            let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
+            let send_as_unsigned = matches.get_occurrences::<String>("send_as_unsigned").is_some();
             let replay_delay = matches.get_one::<String>("replay_delay").expect("required").parse::<u64>()?;
 
             let no_setup = matches.get_occurrences::<String>("no_setup").is_some();
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 replay_delay,
                 entropy_threshold,
                 exit_on_tx_fail,
-                send_as_raw,
+                send_as_unsigned,
             ).await?;
         },
         "live" => {
@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("Invalid entropy_threshold").parse::<f32>()?;
             let exit_on_tx_fail = matches.get_occurrences::<String>("exit_on_tx_fail").is_some();
-            let send_as_raw = matches.get_occurrences::<String>("send_as_raw").is_some();
+            let send_as_unsigned = matches.get_occurrences::<String>("send_as_unsigned").is_some();
             let replay_delay = matches.get_one::<String>("replay_delay").expect("Invalid replay_delay").parse::<u64>()?;
             let block_listen_time = matches.get_one::<String>("block_listen_time").expect("Invalid block_listen_time").parse::<u64>()?;
 
@@ -166,7 +166,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 block_listen_time,
                 entropy_threshold,
                 exit_on_tx_fail,
-                send_as_raw,
+                send_as_unsigned,
             ).await?;
         },
         "track" => {
