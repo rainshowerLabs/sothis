@@ -5,8 +5,9 @@ use serde_json::Value;
 use ethers::utils::hex;
 use ethers::types::{
     H160,
+    Bytes,
     Eip1559TransactionRequest,
-    Bytes, TransactionRequest,
+    TransactionRequest,
 };
 
 use std::str::FromStr;

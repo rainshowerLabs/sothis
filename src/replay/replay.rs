@@ -61,7 +61,7 @@ pub async fn replay_historic_blocks(
             entropy_threshold,
             exit_on_tx_fail,
             send_as_raw,
-            ).await?;
+        ).await?;
 
         // set next block timestamp
         replay_rpc.evm_set_next_block_timestamp(
