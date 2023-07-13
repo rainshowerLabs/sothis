@@ -108,18 +108,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Name of the file."))
         .get_matches();
 
-    let source_rpc: String = matches.get_one::<String>("source_rpc").expect("required").to_string();
+    let source_rpc: String = matches.get_one::<String>("source_rpc").expect("Invalid source_rpc").to_string();
     let source_rpc = RpcConnection::new(source_rpc);
 
-    let mode: String = matches.get_one::<String>("mode").expect("required").to_string();    
+    let mode: String = matches.get_one::<String>("mode").expect("Invalid mode").to_string();    
     match mode.as_str() {
         "historic" => {
             println!("Replaying in historic mode...");
         
-            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("required").to_string();
+            let replay_rpc: String = matches.get_one::<String>("replay_rpc").expect("Invalid replay_rpc").to_string();
             let replay_rpc = RpcConnection::new(replay_rpc);
 
-            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("No valid --terminal_block set!").to_string();
+            let terminal_block: String = matches.get_one::<String>("terminal_block").expect("No valid terminal_block set!").to_string();
             let terminal_block = format_number_input(&terminal_block);
 
             let entropy_threshold = matches.get_one::<String>("entropy_threshold").expect("required").parse::<f32>()?;
