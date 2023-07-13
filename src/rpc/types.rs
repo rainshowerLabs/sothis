@@ -1,8 +1,13 @@
+use ethers::types::transaction::eip2930::AccessList;
 use serde::{Deserialize, Serialize,};
 use serde_json::Value;
 
 use ethers::utils::hex;
-use ethers::types::H160;
+use ethers::types::{
+    H160,
+    Eip1559TransactionRequest,
+    Bytes,
+};
 
 use std::str::FromStr;
 use std::borrow::Cow;
@@ -65,18 +70,64 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn rlp_serialize_tx(
-        &mut self,
+        &self,
         chain_id: u64,
     ) -> Result<String, Box<dyn std::error::Error>> {
 
+        let encoded;
         // if access list exists we need the typed transaction to be an eip1559 one
-        let mut typed_tx;
         if self.accessList.is_some() {
-            typed_tx = TypedTransaction::Eip1559(/* Eip1559TransactionRequest */);
+            encoded = self.rlp_serialize_eip1559(chain_id)?;
         } else {
-            typed_tx = Default::default();
+            encoded = self.rlp_serialize_legacy(chain_id)?;
         }
-        
+
+        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
+        Ok(encoded)
+    }
+
+    fn rlp_serialize_eip1559(
+        &self,
+        chain_id: u64,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let transaction = Eip1559TransactionRequest {
+            from: Some(H160::from_str(&self.from).unwrap()),
+            to: Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
+            gas: Some(U256::from_dec_str(&self.gas)?),
+            value: Some(U256::from_dec_str(&self.value)?),
+            data: Some(Bytes::from(hex::decode(&self.input)?)), // ?????
+            nonce: Some(U256::from_dec_str(&self.nonce)?),
+            access_list: AccessList::default(), // TODO: make this not-default later. its optional so who cares for now
+            max_priority_fee_per_gas: Some(U256::from_dec_str(&self.maxPriorityFeePerGas.clone().unwrap())?),
+            max_fee_per_gas: Some(U256::from_dec_str(&self.maxFeePerGas.clone().unwrap())?),
+            chain_id: Some(chain_id.into()),
+        };
+
+        let typed_tx = TypedTransaction::Eip1559(transaction);
+
+        // convert r and s to U256
+        // convert v to U64
+        // r, s and v are str's. it doesnt matter too much performance wise that we
+        // are converting it here since we are only using it here
+        let r: U256 = U256::from_str(&self.r)?;
+        let s: U256 = U256::from_str(&self.s)?;
+        let v: u64 = hex_to_decimal(&self.v)?;
+
+        // create a new use ethers::types::Signature with the r, s, and v values
+        let sig: Signature = Signature {
+            r, // as U256
+            s, // as U256
+            v, // as U64
+        };
+
+        Ok(hex::encode(typed_tx.rlp_signed(&sig)))
+    }
+
+    fn rlp_serialize_legacy(
+        &self,
+        chain_id: u64,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let mut typed_tx: TypedTransaction = Default::default();
 
         match self.to {
             Some(_) => {
@@ -130,9 +181,9 @@ impl Transaction {
         // Add 0x prefix to encoded tx
         let encoded = format!("0x{}", encoded);
 
-        //println!("ENCODED: {:?}", hex::encode(typed_tx.rlp_signed(&sig)));
         Ok(encoded)
     }
+
 
 }
 
