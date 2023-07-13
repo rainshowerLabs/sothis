@@ -4,6 +4,8 @@
 
 Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node. 
 
+**For detailed instructions, read the [wiki.](https://github.com/rainshowerLabs/sothis/wiki)**
+
 ## Support and discussion
 
 Join the [Rainshower Labs discord server](https://discord.gg/Cs3h397gkz) to discuss sothis and get help.
@@ -13,8 +15,6 @@ Join the [Rainshower Labs discord server](https://discord.gg/Cs3h397gkz) to disc
 Sothis has optional arguments that are not listed in their respective mode sections that might prove useful. Please study the help section below. You can view it any time by running `sothis --help`.
 
 ```
-Tool for replaying historical transactions. Designed to be used with anvil or hardhat.
-
 Usage: sothis [OPTIONS] --source_rpc <source_rpc>...
 
 Options:
@@ -52,7 +52,6 @@ Options:
           Print help
   -V, --version
           Print version
-
 ```
 
 Sothis currently has 4 modes. Live, historic, track, and fast track.   
@@ -159,7 +158,3 @@ Yes! Make a github issue detailing your problem.
 ### Why the name?
 
 Sothis is known as the creator and God of Fódlan in Fire Emblem: Thee Houses. She has the ability to rewind time at will.
-
-## todo
-
-- ??????
