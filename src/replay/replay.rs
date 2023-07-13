@@ -91,8 +91,8 @@ pub async fn replay_historic_blocks(
 // 3) Repeat from 2.
 #[allow(dead_code, unused_variables)]
 pub async fn replay_live(
-    replay_rpc: RpcConnection,
     source_rpc: RpcConnection,
+    replay_rpc: RpcConnection,
     replay_delay: u64,
     block_listen_time: u64,
     entropy_threshold: f32,
