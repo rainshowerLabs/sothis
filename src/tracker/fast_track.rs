@@ -23,6 +23,11 @@ pub async fn fast_track_state(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
+    
+    // Print warning that sothis does not have the full context
+    if query_interval.is_some() {
+    	println!("!!! \x1b[93mWARNING:\x1b[0m Query interval is set, sothis will not have the full context of the storage slot changes !!!");
+	}
 
     ctrlc::set_handler(move || {
         interrupted_clone.store(true, Ordering::SeqCst);
@@ -54,7 +59,7 @@ pub async fn fast_track_state(
         if interrupted.load(Ordering::SeqCst) {
             break;
         }
-		
+
 		let latest_slot = source_rpc.get_storage_at_block(contract_address.clone(), storage_slot.clone(), decimal_to_hex(current_block)).await?;
 		let slot = StateChange {
 			block_number: current_block.into(),
@@ -71,7 +76,6 @@ pub async fn fast_track_state(
 		} else {
 			current_block += 1;
 		}
-	
 	}
 	
 	let json = serde_json::to_string(&storage)?;
