@@ -17,6 +17,7 @@ pub async fn fast_track_state(
     contract_address: String,
     terminal_block: Option<u64>,
     origin_block: u64,
+    query_interval: Option<u64>,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {

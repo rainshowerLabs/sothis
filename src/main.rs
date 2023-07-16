@@ -94,6 +94,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .required_if_eq("mode", "fast_track")
             .help("First block sothis will look at."))
+        .arg(Arg::new("query_interval")
+            .long("query_interval")
+            .short('q')
+            .num_args(1..)
+            .requires("fast_track")
+            .help("First block sothis will look at."))
         .arg(Arg::new("path")
             .long("path")
             .short('p')
@@ -207,9 +213,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let storage_slot = U256::from_dec_str(&storage_slot)?;
             
             // If terminal_block is set by the user use that, otherwise have it be none
-            let terminal_block: Option<u64> = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            let terminal_block = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             
             let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
+            let query_interval = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
             let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
@@ -219,6 +226,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 contract_address,
                 terminal_block,
                 origin_block,
+                query_interval,
                 path,
                 filename,
             ).await?;
