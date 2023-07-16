@@ -24,9 +24,13 @@ pub async fn fast_track_state(
     let interrupted = Arc::new(AtomicBool::new(false));
     let interrupted_clone = interrupted.clone();
     
+    // Set how much we're tracking by
+    let interval = 1;
+
     // Print warning that sothis does not have the full context
     if query_interval.is_some() {
     	println!("!!! \x1b[93mWARNING:\x1b[0m Query interval is set, sothis will not have the full context of the storage slot changes !!!");
+    	interval = query_interval.unwrap();
 	}
 
     ctrlc::set_handler(move || {
@@ -71,11 +75,7 @@ pub async fn fast_track_state(
 			storage.state_changes.push(slot);
 		}
 
-		if query_interval.is_some() {
-			current_block += query_interval.unwrap();
-		} else {
-			current_block += 1;
-		}
+		current_block += interval;
 	}
 	
 	let json = serde_json::to_string(&storage)?;
