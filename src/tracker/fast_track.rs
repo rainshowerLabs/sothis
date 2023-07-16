@@ -25,7 +25,7 @@ pub async fn fast_track_state(
     let interrupted_clone = interrupted.clone();
     
     // Set how much we're tracking by
-    let interval = 1;
+    let mut interval = 1;
 
     // Print warning that sothis does not have the full context
     if query_interval.is_some() {
