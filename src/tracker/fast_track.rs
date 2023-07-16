@@ -25,6 +25,7 @@ pub async fn fast_track_state(
     let interrupted_clone = interrupted.clone();
     
     // Set how much we're tracking by
+    // Default is that we are checking every block for state changes
     let mut interval = 1;
 
     // Print warning that sothis does not have the full context
@@ -58,7 +59,6 @@ pub async fn fast_track_state(
 	}
 
 	let mut current_block = origin_block;
-
 	while current_block < terminal_block {
         if interrupted.load(Ordering::SeqCst) {
             break;
