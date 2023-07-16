@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Storage slot for the variable we're tracking"))
         .arg(Arg::new("origin_block")
             .long("origin_block")
-            .short('0')
+            .short('o')
             .num_args(1..)
             .required_if_eq("mode", "fast_track")
             .help("First block sothis will look at."))
