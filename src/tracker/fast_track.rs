@@ -66,7 +66,12 @@ pub async fn fast_track_state(
 			storage.state_changes.push(slot);
 		}
 
-		current_block += 1;
+		if query_interval.is_some() {
+			current_block += query_interval.unwrap();
+		} else {
+			current_block += 1;
+		}
+	
 	}
 	
 	let json = serde_json::to_string(&storage)?;
