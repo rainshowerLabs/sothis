@@ -98,7 +98,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("query_interval")
             .short('q')
             .num_args(1..)
-            .requires("fast_track")
             .help("First block sothis will look at."))
         .arg(Arg::new("path")
             .long("path")
@@ -216,7 +215,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let terminal_block = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
             
             let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
-            let query_interval = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            let query_interval = matches.get_one::<String>("query_interval").map(|x| x.parse().expect("Invalid query interval"));
             let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
             let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
