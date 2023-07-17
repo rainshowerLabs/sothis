@@ -6,8 +6,8 @@ authors = ["makemake <vukasin@gostovic.me>"]
 license = "AGPL-3.0-only"
 description = "Tool for replaying historical EVM state."
 readme = "README.md"
-homepage = "https://github.com/makemake-kbo/sothis"
-repository = "https://github.com/makemake-kbo/sothis"
+homepage = "https://github.com/rainshowerLabs/sothis"
+repository = "https://github.com/rainshowerLabs/sothis"
 keywords = ["cli", "ethereum", "foundry", "reth", "revm"]
 categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
