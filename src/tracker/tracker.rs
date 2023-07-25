@@ -74,8 +74,8 @@ pub async fn track_state(
 	};
 
 	let json = match is_csv {
-		true => storage.serialize_to_csv(),
-		false => storage.serialize_to_json()?,
+		true => storage.serialize_csv(),
+		false => storage.serialize_json()?,
 	};
 
 	let path = format!("{}/{}", path, filename);

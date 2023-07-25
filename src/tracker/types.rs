@@ -24,7 +24,7 @@ pub struct StateChangeList {
 }
 
 impl StateChangeList {
-    pub fn serialize_to_json(&self) -> Result<String, serde_json::Error> {
+    pub fn serialize_json(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string(&self)
     }
 
@@ -33,7 +33,7 @@ impl StateChangeList {
     // }
 
     // When we serialize to csv, we format it as block_number,value
-    pub fn serialize_to_csv(&self) -> String {
+    pub fn serialize_csv(&self) -> String {
         let mut csv = String::new();
         for change in &self.state_changes {
             csv.push_str(&format!("{},{}\n", change.block_number, change.value));
