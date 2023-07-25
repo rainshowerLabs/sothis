@@ -60,7 +60,6 @@ pub async fn track_state(
 	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
 	// We also check if we should serialize it as csv
 	let mut is_csv = false;
-	println!("{:?}", filename);
 	let filename = match filename.as_str() {
 		"" => {
 			let timestamp = get_latest_unix_timestamp();
