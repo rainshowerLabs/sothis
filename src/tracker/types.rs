@@ -7,6 +7,23 @@ pub struct StateChange {
 	pub value: String,
 }
 
+impl StateChange {
+    pub fn serialize_csv(&self) -> String {
+        format!("{},{}", self.block_number, self.value)
+    }
+
+    // pub fn deserialize_csv(csv: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    //     let mut split = csv.split(',');
+    //     let block_number = split.next().unwrap().parse::<U256>()?;
+    //     let value = split.next().unwrap().to_string();
+    //     Ok(StateChange {
+    //         block_number,
+    //         value,
+    //     })
+    // }
+
+}
+
 impl Default for StateChange {
     fn default() -> Self {
         StateChange {
@@ -36,7 +53,8 @@ impl StateChangeList {
     pub fn serialize_csv(&self) -> String {
         let mut csv = String::new();
         for change in &self.state_changes {
-            csv.push_str(&format!("{},{}\n", change.block_number, change.value));
+            csv.push_str(&change.serialize_csv());
+            csv.push('\n');
         }
         csv
     }
