@@ -101,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("First block sothis will look at."))
         .arg(Arg::new("file_type")
             .long("file_type")
-            .short('f')
+            .short('i')
             .num_args(1..)
             .default_value("json")
             .help("Choose between either JSON or CSV to write the data to."))
