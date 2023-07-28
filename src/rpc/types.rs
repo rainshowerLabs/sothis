@@ -183,6 +183,6 @@ pub struct TransactionParams {
     pub gas: String,
     pub gasPrice: String,
     pub data: String,
-    pub nonce: String,
-    pub chainId: String,
+    pub nonce: Option<String>,
+    pub chainId: Option<String>,
 }
