@@ -2,6 +2,7 @@ use crate::RpcConnection;
 use crate::rpc::format::{hex_to_decimal, decimal_to_hex};
 use crate::tracker::types::*;
 use crate::tracker::time::get_latest_unix_timestamp;
+use crate::rpc::types::TransactionParams;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -61,6 +62,18 @@ pub async fn call_track(
         if interrupted.load(Ordering::SeqCst) {
             break;
         }
+
+        let tx = TransactionParams { 
+        	from: (),
+        	to: (),
+        	value: (),
+        	gas: (),
+        	gasPrice: (),
+        	data: (),
+        	chainId: None,
+			nonce: None,
+		
+        };
 
 		let latest_call = source_rpc.call(tx, decimal_to_hex(current_block)).await?;
 		let slot = StateChange {
