@@ -41,7 +41,7 @@ impl RpcConnection {
     pub fn new(url: String) -> Self {
         Self {
             client: Client::new(),
-            url: Url::parse(&url).expect("REASON").into(),
+            url: Url::parse(&url).expect("Your url is invalid!").into(),
         }
     }
 
