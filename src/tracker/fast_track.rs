@@ -89,7 +89,7 @@ pub async fn fast_track_state(
 			format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
 		},
 		filename if filename.contains(".csv") => {
-			println!("Formatting as CSV");
+			println!("Formatting as CSV...");
 			json = storage.serialize_csv();
 			filename.to_string()
 		},
