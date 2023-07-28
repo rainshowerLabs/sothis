@@ -49,11 +49,10 @@ impl RpcConnection {
     async fn send_request(
         &self,
         method: &str,
-        params: Value,
+        mut params: Value,
     ) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
-        let mut params = params.clone();
         if params.is_null() {
             params = json!([]);
         }
