@@ -53,21 +53,17 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
+        let mut params = params.clone();
         if params.is_null() {
-            request = json!({
-                "method": method.to_string(),
-                "params": [],
-                "id": 1,
-                "jsonrpc": "2.0".to_string(),
-            });
-        } else {
-            request = json!({
-                "method": method.to_string(),
-                "params": params,
-                "id": 1,
-                "jsonrpc": "2.0".to_string(),
-            });
+            params = json!([]);
         }
+
+        request = json!({
+            "method": method.to_string(),
+            "params": params,
+            "id": 1,
+            "jsonrpc": "2.0".to_string(),
+        });
 
         // #[cfg(debug_assertions)] {
         //     println!("Sending request: {}", request.clone());
