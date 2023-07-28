@@ -60,3 +60,30 @@ impl StateChangeList {
     }
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CallChangeList {
+    pub address: String,
+    pub calldata: String,
+    pub state_changes: Vec<StateChange>,
+}
+
+#[allow(dead_code)]
+impl CallChangeList {
+    pub fn serialize_json(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string(&self)
+    }
+
+    // pub fn deserialize_from_json(json: &str) -> Result<Self, serde_json::Error> {
+    //     serde_json::from_str(json)
+    // }
+
+    // When we serialize to csv, we format it as block_number,value
+    pub fn serialize_csv(&self) -> String {
+        let mut csv = String::new();
+        for change in &self.state_changes {
+            csv.push_str(&change.serialize_csv());
+            csv.push('\n');
+        }
+        csv
+    }
+}

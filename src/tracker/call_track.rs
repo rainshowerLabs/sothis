@@ -8,9 +8,8 @@ use std::sync::Arc;
 use std::fs;
 
 use ctrlc;
-use ethers::types::U256;
 
-pub async call_track(
+pub async fn call_track(
     source_rpc: RpcConnection,
     calldata: String,
     contract_address: String,
@@ -37,9 +36,9 @@ pub async call_track(
         interrupted_clone.store(true, Ordering::SeqCst);
     })?;
 
-	let mut storage = StateChangeList {
+	let mut storage = CallChangeList {
 		address: contract_address.clone(),
-		storage_slot: storage_slot,
+		calldata: calldata,
 		state_changes: Vec::new(),
 	};
 
@@ -59,7 +58,20 @@ pub async call_track(
 
 	let mut current_block = origin_block;
 	while current_block < terminal_block {
+        if interrupted.load(Ordering::SeqCst) {
+            break;
+        }
 
+		let latest_call = source_rpc.call(tx, decimal_to_hex(current_block)).await?;
+		let slot = StateChange {
+			block_number: current_block.into(),
+			value: latest_call,
+		};
+
+		if storage.state_changes.last().map(|change| change.value != slot.value).unwrap_or(true) {
+			println!("New storage slot value at block {}: {:?}", slot.block_number, &slot.value);
+			storage.state_changes.push(slot);
+		}
 
 		current_block += interval;
 	}
@@ -72,7 +84,7 @@ pub async call_track(
 			let timestamp = get_latest_unix_timestamp();
 			println!("No filename specified, using default and formatting as JSON");
 			json = storage.serialize_json()?;
-			format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
+			format!("address-{}-calldata-{}-timestamp-{}.json", contract_address, calldata, timestamp)
 		},
 		filename if filename.contains(".csv") => {
 			println!("Formatting as CSV...");
