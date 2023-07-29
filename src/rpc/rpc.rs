@@ -173,7 +173,8 @@ impl RpcConnection {
     ) -> Result<String, RequestError> {
         // TODO: maybe value?
         let params = json!([tx, block_number]);
-        Ok(self.send_request("eth_call", params).await?)
+        let result = self.send_request("eth_call", params).await?;
+        Ok(result.trim_matches('\"').to_string())
     }
 
     /* 
