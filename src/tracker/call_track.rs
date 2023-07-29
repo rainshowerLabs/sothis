@@ -72,7 +72,6 @@ pub async fn call_track(
         };
 
 		let latest_call = source_rpc.call(tx, decimal_to_hex(current_block)).await?;
-		println!("{:?}", latest_call);
 		let slot = StateChange {
 			block_number: current_block.into(),
 			value: latest_call,
