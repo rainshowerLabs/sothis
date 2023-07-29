@@ -39,7 +39,7 @@ pub async fn call_track(
 
 	let mut storage = CallChangeList {
 		address: contract_address.clone(),
-		calldata: calldata,
+		calldata: calldata.clone(),
 		state_changes: Vec::new(),
 	};
 
@@ -65,12 +65,12 @@ pub async fn call_track(
 
         // TODO: the following
         let tx = TransactionParams { 
-        	from: (),
-        	to: (),
-        	value: (),
-        	gas: (),
-        	gasPrice: (),
-        	data: (),
+        	from: "0x0000000000000000000000000000".to_string(),
+        	to: Some(contract_address.clone()),
+        	value: "0".to_string(),
+        	gas: "15000000".to_string(),
+        	gasPrice: "1".to_string(),
+        	data: calldata.clone(),
         	chainId: None,
 			nonce: None,
 

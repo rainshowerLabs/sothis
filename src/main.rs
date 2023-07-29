@@ -11,6 +11,7 @@ use crate::replay::setup::contract_setup;
 
 use crate::tracker::tracker::track_state;
 use crate::tracker::fast_track::fast_track_state;
+use crate::tracker::call_track::call_track;
 
 use crate::rpc::format::hex_to_decimal;
 use crate::rpc::format::format_number_input;
@@ -38,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .short('m')
             .num_args(1..)
             .default_value("historic")
-            .help("Choose between live, historic, track, or fast_track"))
+            .help("Choose between live, historic, track, fast_track, or call_track"))
         .arg(Arg::new("terminal_block")
             .long("terminal_block")
             .short('b')
@@ -87,6 +88,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .num_args(1..)
             .required_if_eq("mode", "track")
             .required_if_eq("mode", "fast_track")
+            .help("Storage slot for the variable we're tracking"))
+        .arg(Arg::new("calldata")
+            .long("calldata")
+            .short('a')
+            .num_args(1..)
+            .required_if_eq("mode", "call_track")
             .help("Storage slot for the variable we're tracking"))
         .arg(Arg::new("origin_block")
             .long("origin_block")
@@ -229,7 +236,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 path,
                 filename,
             ).await?;
-        }
+        },
+        "call_track" => {
+            println!("Call tracking...");
+            println!("Send SIGTERM or SIGINT (ctrl-c) to serialize to JSON, write and stop.");
+            
+            let contract_address: String = matches.get_one::<String>("contract_address").expect("Invalid contract_address").to_string();
+            let calldata: String = matches.get_one::<String>("calldata").expect("Invalid calldata").to_string();
+            
+            // If terminal_block is set by the user use that, otherwise have it be none
+            let terminal_block = matches.get_one::<String>("terminal_block").map(|x| x.parse().expect("Invalid terminal block"));
+            
+            let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
+            let query_interval = matches.get_one::<String>("query_interval").map(|x| x.parse().expect("Invalid query interval"));
+            let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
+            let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
+
+            call_track(
+                source_rpc,
+                calldata,
+                contract_address,
+                terminal_block,
+                origin_block,
+                query_interval,
+                path,
+                filename,
+            ).await?;
+        },
         &_ => {
             panic!("Mode does not exist!");
         },
