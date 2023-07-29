@@ -88,27 +88,31 @@ pub async fn call_track(
 	
 	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
 	// We also check if we should serialize it as csv
-	let json;
 	let filename = match filename.as_str() {
 		"" => {
 			let timestamp = get_latest_unix_timestamp();
 			println!("No filename specified, using default and formatting as JSON");
 			format!("address-{}-calldata-{}-timestamp-{}.json", contract_address, calldata, timestamp)
 		},
-		filename if filename.contains(".csv") => {
-			println!("Formatting as CSV...");
-			filename.to_string()
-		},
 		_ => {
 			filename
 		},
 	};
 
-	if as_dec {
-		json = storage.serialize_json_as_dec()?;
-	} else {
-		json = storage.serialize_json()?;
+	// This is a mid solution
+	// as_dec, is_csv
+	let mut is_csv = false;
+	if filename.contains(".csv") {
+		is_csv = true;
 	}
+
+	let json;
+	match (as_dec, is_csv) {
+		(false, false) => json = storage.serialize_json()?,
+		(true, false) => json = storage.serialize_json_dec()?,
+		(false, true) => json = storage.serialize_csv(),
+		(true, true) => json = storage.serialize_csv_dec(),
+	};
 
 	let path = format!("{}/{}", path, filename);
 	println!("\nWriting to file: {}", path);
