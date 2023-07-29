@@ -74,14 +74,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .arg(Arg::new("no_setup")
             .long("no_setup")
             .num_args(0..)
-            .help("Start replaying immediately."))
+            .help("Start replaying immediately"))
         .arg(Arg::new("contract_address")
             .long("contract_address")
             .short('c')
             .num_args(1..)
             .required_if_eq("mode", "track")
             .required_if_eq("mode", "fast_track")
-            .help("Address of the contract we're tracking storage."))
+            .help("Address of the contract we're tracking storage"))
         .arg(Arg::new("storage_slot")
             .long("storage_slot")
             .short('l')
@@ -94,18 +94,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .short('a')
             .num_args(1..)
             .required_if_eq("mode", "call_track")
-            .help("Storage slot for the variable we're tracking"))
+            .help("Calldata used"))
         .arg(Arg::new("origin_block")
             .long("origin_block")
             .short('o')
             .num_args(1..)
             .required_if_eq("mode", "fast_track")
-            .help("First block sothis will look at."))
+            .help("First block sothis will look at"))
         .arg(Arg::new("query_interval")
             .long("query_interval")
             .short('q')
             .num_args(1..)
-            .help("First block sothis will look at."))
+            .help("First block sothis will look at"))
+        .arg(Arg::new("as_dec")
+            .long("as_dec")
+            .short('e')
+            .num_args(0..)
+            .help("Format the results as decimal. Note: Block number will be in hex"))
         .arg(Arg::new("path")
             .long("path")
             .short('p')
@@ -249,6 +254,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
             let query_interval = matches.get_one::<String>("query_interval").map(|x| x.parse().expect("Invalid query interval"));
+            let as_dec = matches.get_occurrences::<String>("as_dec").is_some();
             let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
             let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
@@ -259,6 +265,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 terminal_block,
                 origin_block,
                 query_interval,
+                as_dec,
                 path,
                 filename,
             ).await?;

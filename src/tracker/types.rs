@@ -1,3 +1,4 @@
+use crate::hex_to_decimal;
 use serde::{Deserialize, Serialize};
 use ethers::types::U256;
 
@@ -71,6 +72,25 @@ pub struct CallChangeList {
 impl CallChangeList {
     pub fn serialize_json(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string(&self)
+    }
+
+    pub fn serialize_json_as_dec(&self) -> Result<String, serde_json::Error> {
+        // We have to iterate over everything and convert to decimal
+        let mut changes: Vec<StateChange> = Vec::new();
+        for change in &self.state_changes {
+            changes.push(StateChange {
+                block_number: change.block_number.clone(),
+                value: hex_to_decimal(&change.value).unwrap().to_string(),
+            });
+        }
+
+        let list = CallChangeList {
+            address: self.address.clone(),
+            calldata: self.calldata.clone(),
+            state_changes: changes,
+        };
+
+        serde_json::to_string(&list)
     }
 
     // pub fn deserialize_from_json(json: &str) -> Result<Self, serde_json::Error> {

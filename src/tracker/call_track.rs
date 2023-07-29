@@ -18,6 +18,7 @@ pub async fn call_track(
     terminal_block: Option<u64>,
     origin_block: u64,
     query_interval: Option<u64>,
+    as_dec: bool,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -92,19 +93,22 @@ pub async fn call_track(
 		"" => {
 			let timestamp = get_latest_unix_timestamp();
 			println!("No filename specified, using default and formatting as JSON");
-			json = storage.serialize_json()?;
 			format!("address-{}-calldata-{}-timestamp-{}.json", contract_address, calldata, timestamp)
 		},
 		filename if filename.contains(".csv") => {
 			println!("Formatting as CSV...");
-			json = storage.serialize_csv();
 			filename.to_string()
 		},
 		_ => {
-			json = storage.serialize_json()?;
 			filename
 		},
 	};
+
+	if as_dec {
+		json = storage.serialize_json_as_dec()?;
+	} else {
+		json = storage.serialize_json()?;
+	}
 
 	let path = format!("{}/{}", path, filename);
 	println!("\nWriting to file: {}", path);
