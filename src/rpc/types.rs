@@ -186,3 +186,11 @@ pub struct TransactionParams {
     pub nonce: Option<String>,
     pub chainId: Option<String>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CallParams {
+    pub from: serde_json::value::Value,
+    pub to: String,
+    pub data: String,
+}
+

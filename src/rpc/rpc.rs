@@ -171,8 +171,13 @@ impl RpcConnection {
         tx: TransactionParams,
         block_number: String,
     ) -> Result<String, RequestError> {
-        // We need: from, to, gas, gasprice, value and data
-        let params = json!([tx.from, tx.to, tx.gas, tx.gasPrice, tx.value, tx.data, block_number]);
+        // TODO: maybe value?
+        let params = CallParams {
+            from: Value::Null,
+            to: tx.to.unwrap(),
+            data: tx.data,
+        };
+        let params = json!([params, block_number]);
         Ok(self.send_request("eth_call", params).await?)
     }
 
