@@ -1,10 +1,15 @@
 import sys
 import re
 
+def is_valid_eth_address(hex_str):
+    return len(hex_str) == 42 and hex_str[:2] == "0x" and all(c in "0123456789abcdefABCDEF" for c in hex_str[2:])
+
 def hex_to_decimal(match):
     hex_str = match.group(0)
-    decimal_num = int(hex_str, 16)
-    return str(decimal_num)
+    if is_valid_eth_address(hex_str):
+        return hex_str  # Ignore valid Ethereum addresses
+    decimal_num = str(int(hex_str, 16))
+    return decimal_num
 
 def convert_hex_to_decimal_in_file(file_path):
     try:
@@ -18,7 +23,7 @@ def convert_hex_to_decimal_in_file(file_path):
         with open(file_path, 'w') as file:
             file.write(converted_content)
 
-        print(f"Conversion successful. Hex numbers in '{file_path}' converted to decimal.")
+        print(f"Conversion successful. Hex numbers in '{file_path}' (excluding Ethereum addresses) converted to decimal.")
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")
     except Exception as e:
