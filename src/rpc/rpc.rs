@@ -168,16 +168,11 @@ impl RpcConnection {
     // Sends raw transaction
     pub async fn call(
         &self,
-        tx: TransactionParams,
+        tx: CallParams,
         block_number: String,
     ) -> Result<String, RequestError> {
         // TODO: maybe value?
-        let params = CallParams {
-            from: Value::Null,
-            to: tx.to.unwrap(),
-            data: tx.data,
-        };
-        let params = json!([params, block_number]);
+        let params = json!([tx, block_number]);
         Ok(self.send_request("eth_call", params).await?)
     }
 

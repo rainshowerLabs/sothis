@@ -2,7 +2,8 @@ use crate::RpcConnection;
 use crate::rpc::format::{hex_to_decimal, decimal_to_hex};
 use crate::tracker::types::*;
 use crate::tracker::time::get_latest_unix_timestamp;
-use crate::rpc::types::TransactionParams;
+use crate::rpc::types::CallParams;
+use serde_json::Value;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -64,18 +65,14 @@ pub async fn call_track(
         }
 
         // TODO: the following
-        let tx = TransactionParams { 
-        	from: "0x0000000000000000000000000000".to_string(),
-        	to: Some(contract_address.clone()),
-        	value: "0".to_string(),
-        	gas: "15000000".to_string(),
-        	gasPrice: "1".to_string(),
-        	data: calldata.clone(),
-        	chainId: None,
-			nonce: None,
+        let tx = CallParams { 
+        	from: Value::Null,
+            to: contract_address.clone(),
+            data: calldata.clone(),
         };
 
 		let latest_call = source_rpc.call(tx, decimal_to_hex(current_block)).await?;
+		println!("{:?}", latest_call);
 		let slot = StateChange {
 			block_number: current_block.into(),
 			value: latest_call,
