@@ -120,7 +120,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .help("Name of the file."))
         .get_matches();
 
-    let source_rpc: String = matches.get_one::<String>("source_rpc").expect("Invalid source_rpc").to_string();
+    let source_rpc = matches.get_one::<String>("source_rpc").expect("Invalid source_rpc").to_string();
     let source_rpc = RpcConnection::new(source_rpc);
 
     let mode: String = matches.get_one::<String>("mode").expect("Invalid mode").to_string();    
