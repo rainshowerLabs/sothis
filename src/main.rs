@@ -75,6 +75,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("no_setup")
             .num_args(0..)
             .help("Start replaying immediately."))
+        .arg(Arg::new("decimal")
+            .long("decimal")
+            .num_args(0..)
+            .help("Start replaying immediately."))
         .arg(Arg::new("contract_address")
             .long("contract_address")
             .short('c')
@@ -197,6 +201,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
 
             let block_listen_time = matches.get_one::<String>("block_listen_time").expect("required").parse::<u64>()?;
+            let decimal = matches.get_occurrences::<String>("decimal").is_some();
             let path = matches.get_one::<String>("path").expect("required").to_string();
             let filename = matches.get_one::<String>("filename").expect("required").to_string();
 
@@ -206,6 +211,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 contract_address,
                 terminal_block,
                 block_listen_time,
+                decimal,
                 path,
                 filename,
             ).await?;
@@ -223,6 +229,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
             let query_interval = matches.get_one::<String>("query_interval").map(|x| x.parse().expect("Invalid query interval"));
+            let decimal = matches.get_occurrences::<String>("decimal").is_some();
             let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
             let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
@@ -233,6 +240,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 terminal_block,
                 origin_block,
                 query_interval,
+                decimal,
                 path,
                 filename,
             ).await?;
@@ -249,6 +257,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             
             let origin_block = matches.get_one::<String>("origin_block").expect("Invalid origin_block").parse::<u64>()?;
             let query_interval = matches.get_one::<String>("query_interval").map(|x| x.parse().expect("Invalid query interval"));
+            let decimal = matches.get_occurrences::<String>("decimal").is_some();
             let path = matches.get_one::<String>("path").expect("Invalid path").to_string();
             let filename = matches.get_one::<String>("filename").expect("Invalid filename").to_string();
 
@@ -259,6 +268,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 terminal_block,
                 origin_block,
                 query_interval,
+                decimal,
                 path,
                 filename,
             ).await?;

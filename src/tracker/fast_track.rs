@@ -17,6 +17,7 @@ pub async fn fast_track_state(
     terminal_block: Option<u64>,
     origin_block: u64,
     query_interval: Option<u64>,
+    decimal: bool,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -77,7 +78,7 @@ pub async fn fast_track_state(
 		current_block += interval;
 	}
 	
-	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string())?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string(), decimal)?;
 
 	Ok(())
 }

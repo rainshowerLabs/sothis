@@ -16,6 +16,7 @@ pub async fn track_state(
     contract_address: String,
     terminal_block: Option<u64>,
     block_listen_time: u64,
+    decimal: bool,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -56,7 +57,7 @@ pub async fn track_state(
 		block_number = source_rpc.listen_for_blocks(block_listen_time).await?;
 	}
 
-	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string())?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string(), decimal)?;
 
 	Ok(())
 }

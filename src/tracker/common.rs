@@ -14,7 +14,7 @@ pub fn set_filename_and_serialize<T: SerializeStorage>(
 	middle_value: String,
 	output_as_decimal: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-	let json: String;
+	let mut json: String;
 
 	// Set the filename to `address{contract_address}-{middle_label}-{storage_slot}-timestamp-{unix_timestamp} if its the default one
 	// We also check if we should serialize it as csv
@@ -40,7 +40,7 @@ pub fn set_filename_and_serialize<T: SerializeStorage>(
 	println!("\nWriting to file: {}", path);
 
 	if output_as_decimal {
-		let json = output_to_dec(json);
+		json = output_to_dec(json);
 	}
 
 	fs::write(path, json)?;
@@ -67,12 +67,7 @@ fn output_to_dec(json: String) -> String {
             hex_str.to_string()
         } else {
             // Convert the hexadecimal to decimal and return as a string
-            if let decimal = hex_to_decimal(hex_str).unwrap() {
-                decimal.to_string()
-            } else {
-                // If the conversion fails, keep the original hexadecimal as is
-                hex_str.to_string()
-            }
+            hex_to_decimal(hex_str).unwrap().to_string()
         }
     });
 
