@@ -11,24 +11,23 @@ pub fn set_filename_and_serialize(
 	contract_address: String,
 	storage_slot: U256,
 ) -> Result<(), Box<dyn std::error::Error>> {
-	let mut is_csv = false;
+	let json: String;
 	let filename = match filename.as_str() {
 		"" => {
 			let timestamp = get_latest_unix_timestamp();
 			println!("No filename specified, using default and formatting as JSON");
+			json = storage.serialize_json()?;
 			format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
 		},
 		filename if filename.contains(".csv") => {
 			println!("Formatting as CSV");
-			is_csv = true;
+			json = storage.serialize_csv();
 			filename.to_string()
 		},
-		_ => filename,
-	};
-
-	let json = match is_csv {
-		true => storage.serialize_csv(),
-		false => storage.serialize_json()?,
+		_ => {
+			json = storage.serialize_json()?;
+			filename
+		},
 	};
 
 	let path = format!("{}/{}", path, filename);
