@@ -63,7 +63,6 @@ pub async fn call_track(
             break;
         }
 
-        // TODO: the following
         let tx = CallParams { 
         	from: Value::Null,
             to: contract_address.clone(),
