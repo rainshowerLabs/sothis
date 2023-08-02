@@ -1,7 +1,7 @@
-use crate::tracker::common::set_filename_and_serialize;
 use crate::RpcConnection;
 use crate::rpc::format::{hex_to_decimal, decimal_to_hex};
 use crate::tracker::types::*;
+use crate::tracker::common::set_filename_and_serialize;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -77,7 +77,7 @@ pub async fn fast_track_state(
 		current_block += interval;
 	}
 	
-	set_filename_and_serialize(path, filename, storage, contract_address, storage_slot)?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string())?;
 
 	Ok(())
 }

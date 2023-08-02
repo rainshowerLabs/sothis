@@ -1,23 +1,26 @@
+use crate::tracker::types::SerializeStorage;
 use crate::tracker::time::get_latest_unix_timestamp;
-use crate::tracker::types::StateChangeList;
-use crate::U256;
 
 use std::fs;
 
-pub fn set_filename_and_serialize(
+pub fn set_filename_and_serialize<T: SerializeStorage>(
 	path: String,
 	filename: String,
-	storage: StateChangeList,
+	storage: T,
 	contract_address: String,
-	storage_slot: U256,
+	middle_label: &str,
+	middle_value: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
 	let json: String;
+
+	// Set the filename to `address{contract_address}-{middle_label}-{storage_slot}-timestamp-{unix_timestamp} if its the default one
+	// We also check if we should serialize it as csv
 	let filename = match filename.as_str() {
 		"" => {
 			let timestamp = get_latest_unix_timestamp();
 			println!("No filename specified, using default and formatting as JSON");
 			json = storage.serialize_json()?;
-			format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
+			format!("address-{}-{}-{}-timestamp-{}.json", contract_address, middle_label, middle_value, timestamp)
 		},
 		filename if filename.contains(".csv") => {
 			println!("Formatting as CSV");

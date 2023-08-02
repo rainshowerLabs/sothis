@@ -1,11 +1,10 @@
 use crate::RpcConnection;
 use crate::rpc::format::hex_to_decimal;
 use crate::tracker::types::*;
-use crate::tracker::time::get_latest_unix_timestamp;
+use crate::tracker::common::set_filename_and_serialize;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::fs;
 
 use ctrlc;
 use ethers::types::U256;
@@ -57,31 +56,7 @@ pub async fn track_state(
 		block_number = source_rpc.listen_for_blocks(block_listen_time).await?;
 	}
 
-	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
-	// We also check if we should serialize it as csv
-	let mut is_csv = false;
-	let filename = match filename.as_str() {
-		"" => {
-			let timestamp = get_latest_unix_timestamp();
-			println!("No filename specified, using default and formatting as JSON");
-			format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
-		},
-		filename if filename.contains(".csv") => {
-			println!("Formatting as CSV");
-			is_csv = true;
-			filename.to_string()
-		},
-		_ => filename,
-	};
-
-	let json = match is_csv {
-		true => storage.serialize_csv(),
-		false => storage.serialize_json()?,
-	};
-
-	let path = format!("{}/{}", path, filename);
-	println!("\nWriting to file: {}", path);
-	fs::write(path, json)?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string())?;
 
 	Ok(())
 }
