@@ -1,18 +1,18 @@
 use crate::RpcConnection;
 use crate::rpc::format::{hex_to_decimal, decimal_to_hex};
 use crate::tracker::types::*;
+use crate::rpc::types::CallParams;
+use serde_json::Value;
 use crate::tracker::common::set_filename_and_serialize;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use ctrlc;
-use ethers::types::U256;
 
-// We querry historical storage from a node instead of waiting for new blocks.
-pub async fn fast_track_state(
+pub async fn call_track(
     source_rpc: RpcConnection,
-    storage_slot: U256,
+    calldata: String,
     contract_address: String,
     terminal_block: Option<u64>,
     origin_block: u64,
@@ -30,7 +30,7 @@ pub async fn fast_track_state(
 
     // Print warning that sothis does not have the full context
     if query_interval.is_some() {
-    	println!("!!! \x1b[93mWARNING:\x1b[0m Query interval is set, sothis will not have the full context of the storage slot changes !!!");
+    	println!("!!! \x1b[93mWARNING:\x1b[0m Query interval is set, sothis will not have the full context of the eth_calls !!!");
     	interval = query_interval.unwrap();
 	}
 
@@ -38,9 +38,9 @@ pub async fn fast_track_state(
         interrupted_clone.store(true, Ordering::SeqCst);
     })?;
 
-	let mut storage = StateChangeList {
+	let mut storage = CallChangeList {
 		address: contract_address.clone(),
-		storage_slot: storage_slot,
+		calldata: calldata.clone(),
 		state_changes: Vec::new(),
 	};
 
@@ -64,21 +64,27 @@ pub async fn fast_track_state(
             break;
         }
 
-		let latest_slot = source_rpc.get_storage_at_block(contract_address.clone(), storage_slot.clone(), decimal_to_hex(current_block)).await?;
+        let tx = CallParams { 
+        	from: Value::Null,
+            to: contract_address.clone(),
+            data: calldata.clone(),
+        };
+
+		let latest_call = source_rpc.call(tx, decimal_to_hex(current_block)).await?;
 		let slot = StateChange {
 			block_number: current_block.into(),
-			value: latest_slot,
+			value: latest_call,
 		};
 
 		if storage.state_changes.last().map(|change| change.value != slot.value).unwrap_or(true) {
-			println!("New storage slot value at block {}: {:?}", slot.block_number, &slot.value);
+			println!("New call value at block {}: {:?}", slot.block_number, &slot.value);
 			storage.state_changes.push(slot);
 		}
 
 		current_block += interval;
 	}
 	
-	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string(), decimal)?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "calldata", calldata, decimal)?;
 
 	Ok(())
 }

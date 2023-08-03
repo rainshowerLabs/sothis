@@ -1,11 +1,10 @@
 use crate::RpcConnection;
 use crate::rpc::format::hex_to_decimal;
 use crate::tracker::types::*;
-use crate::tracker::time::get_latest_unix_timestamp;
+use crate::tracker::common::set_filename_and_serialize;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::fs;
 
 use ctrlc;
 use ethers::types::U256;
@@ -17,6 +16,7 @@ pub async fn track_state(
     contract_address: String,
     terminal_block: Option<u64>,
     block_listen_time: u64,
+    decimal: bool,
     path: String,
     filename: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -56,19 +56,8 @@ pub async fn track_state(
 
 		block_number = source_rpc.listen_for_blocks(block_listen_time).await?;
 	}
-	let json = serde_json::to_string(&storage)?;
 
-	// Set the filename to `address{contract_address}-slot-{storage_slot}-timestamp-{unix_timestamp} if its the default one
-	let filename = if filename == "" {
-		let timestamp = get_latest_unix_timestamp();
-		format!("address-{}-slot-{}-timestamp-{}.json", contract_address, storage_slot, timestamp)
-	} else {
-		filename
-	};
-
-	let path = format!("{}/{}", path, filename);
-	println!("\nWriting to file: {}", path);
-	fs::write(path, json)?;
+	set_filename_and_serialize(path, filename, storage, contract_address, "slot", storage_slot.to_string(), decimal)?;
 
 	Ok(())
 }

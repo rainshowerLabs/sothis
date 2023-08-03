@@ -41,7 +41,7 @@ impl RpcConnection {
     pub fn new(url: String) -> Self {
         Self {
             client: Client::new(),
-            url: Url::parse(&url).expect("REASON").into(),
+            url: Url::parse(&url).expect("Your url is invalid!").into(),
         }
     }
 
@@ -49,25 +49,20 @@ impl RpcConnection {
     async fn send_request(
         &self,
         method: &str,
-        params: Value,
+        mut params: Value,
     ) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
         if params.is_null() {
-            request = json!({
-                "method": method.to_string(),
-                "params": [],
-                "id": 1,
-                "jsonrpc": "2.0".to_string(),
-            });
-        } else {
-            request = json!({
-                "method": method.to_string(),
-                "params": params,
-                "id": 1,
-                "jsonrpc": "2.0".to_string(),
-            });
+            params = json!([]);
         }
+
+        request = json!({
+            "method": method.to_string(),
+            "params": params,
+            "id": 1,
+            "jsonrpc": "2.0".to_string(),
+        });
 
         // #[cfg(debug_assertions)] {
         //     println!("Sending request: {}", request.clone());
@@ -170,6 +165,18 @@ impl RpcConnection {
         Ok(self.send_request("eth_sendRawTransaction", params).await?)
     }
 
+    // Sends raw transaction
+    pub async fn call(
+        &self,
+        tx: CallParams,
+        block_number: String,
+    ) -> Result<String, RequestError> {
+        // TODO: maybe value?
+        let params = json!([tx, block_number]);
+        let result = self.send_request("eth_call", params).await?;
+        Ok(result.trim_matches('\"').to_string())
+    }
+
     /* 
      * hardhat/anvil specific RPC
      */
@@ -188,8 +195,8 @@ impl RpcConnection {
             gasPrice: tx.gasPrice,
             value: tx.value,
             data: tx.input,
-            nonce: tx.nonce,
-            chainId: chain_id.to_string(),
+            nonce: Some(tx.nonce),
+            chainId: Some(chain_id.to_string()),
         };
 
         let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
