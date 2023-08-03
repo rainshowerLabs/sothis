@@ -10,6 +10,12 @@ Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** t
 
 Join the [Rainshower Labs discord server](https://discord.gg/Cs3h397gkz) to discuss sothis and get help.
 
+## Using sothis as a crate
+
+Sothis can be used as a crate in other rust projects. All tracking modes, as well as the lightweight wrapper around JSON-RPC calls can be used. For more on using sothis as a crate, check out the [wiki.](https://github.com/rainshowerLabs/sothis/wiki)   
+
+We are targeting **1.68.2 as the MSRV**(minimum supported rust version).
+
 ## Usage
 
 Sothis has optional arguments that are not listed in their respective mode sections that might prove useful. Please study the help section below. You can view it any time by running `sothis --help`.
@@ -23,7 +29,7 @@ Options:
   -r, --replay_rpc <replay_rpc>...
           HTTP JSON-RPC of the node we're replaying data to
   -m, --mode <mode>...
-          Choose between live, historic, track, or fast_track [default: historic]
+          Choose between live, historic, track, fast_track, or call_track [default: historic]
   -b, --terminal_block <terminal_block>...
           Block we're replaying until
       --exit_on_tx_fail [<exit_on_tx_fail>...]
@@ -38,11 +44,17 @@ Options:
           Exit the program if a transaction fails
       --no_setup [<no_setup>...]
           Start replaying immediately.
+      --decimal [<decimal>...]
+          Start replaying immediately.
   -c, --contract_address <contract_address>...
           Address of the contract we're tracking storage.
   -l, --storage_slot <storage_slot>...
           Storage slot for the variable we're tracking
-  -0, --origin_block <origin_block>...
+  -a, --calldata <calldata>...
+          Storage slot for the variable we're tracking
+  -o, --origin_block <origin_block>...
+          First block sothis will look at.
+  -q, --query_interval <query_interval>...
           First block sothis will look at.
   -p, --path <path>...
           Path to file we're writing to [default: .]
@@ -52,6 +64,7 @@ Options:
           Print help
   -V, --version
           Print version
+
 ```
 
 Sothis currently has 5 modes. Live, historic, track, fast track, and call track.   
