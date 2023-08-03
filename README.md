@@ -54,7 +54,7 @@ Options:
           Print version
 ```
 
-Sothis currently has 4 modes. Live, historic, track, and fast track.   
+Sothis currently has 5 modes. Live, historic, track, fast track, and call track.   
 
 ### Historic
 
@@ -137,6 +137,27 @@ The fast track mode is used to track the change for a *historic* storage slot. I
 Once you are done tracking the slot, terminate the process via a `SIGTERM` or a `SIGINT` (ctrl-c), which will terminate execution and write the file. Keep in mind that sothis will check once per new block if you tried to terminate it. If no new block are produced on the source_rpc, sothis will not terminate and nothing will be written if you force close it.
 <!-- easter egg contract -->
 `sothis --mode track --source_rpc http://localhost:8545 --contract_address 0x910cbd523d972eb0a6f4cae4618ad62622b39dbf --storage_slot 3 --filename siuuu.json --path ~/Desktop
+`
+
+
+### Call track
+
+The fast call mode is used to track the change for a *historic* eth_call. It cannot be used to get a live view of it. The source_rpc must be an archive node for this mode to perform optimally. This can be used to get historic chainlink oracle prices, see the output of decentralzied exchange swaps over time, and more.
+
+#### Usage
+
+- `--mode call_track`: Used to denote we are using the tracking mode.
+- `--source_rpc`: RPC of the node we are getting data from.
+- `--contract_address`: Address of the contract we'll be calling.
+- `--calldata`: Calldata we're using.
+- `--origin_block`: The block from which we start tracking.
+- `--terminal_block`(optional): Final block sothis will track. If not specified, sothis will track until terminated.
+- `--filename`(optional): Name of our output file. The default filename is formatted as: `address-{}-slot-{}-timestamp-{}.json`.
+- `--path`(optional): Path to our output file. The default path is the current directory.
+
+Once you are done tracking the slot, terminate the process via a `SIGTERM` or a `SIGINT` (ctrl-c), which will terminate execution and write the file. Keep in mind that sothis will check once per new block if you tried to terminate it. If no new block are produced on the source_rpc, sothis will not terminate and nothing will be written if you force close it. The example below demonstrates tracking of the historic chainlink oracle price for ETH/USD on mainnet.
+
+`sothis --mode call_track --source_rpc http://localhost:8545 --contract_address 0x1c479675ad559DC151F6Ec7ed3FbF8ceE79582B6 --origin_block 17799350 --calldata 0x06f13056
 `
 
 ## Installation
