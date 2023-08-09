@@ -1,10 +1,15 @@
 use crate::rpc::error::RequestError;
-use crate::RpcConnection;
 use crate::rpc::types::Transaction;
+use crate::RpcConnection;
 
 // Abstract over the return types of send functions
 impl RpcConnection {
-    async fn send(&self, tx: Transaction, chain_id: u64, send_as_unsigned: bool) -> Result<String, RequestError> {
+    async fn send(
+        &self,
+        tx: Transaction,
+        chain_id: u64,
+        send_as_unsigned: bool,
+    ) -> Result<String, RequestError> {
         if send_as_unsigned {
             self.send_unsigned_transaction(tx, chain_id).await
         } else {
@@ -22,7 +27,6 @@ pub async fn send_transactions(
     exit_on_tx_fail: bool,
     send_as_unsigned: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-
     let tx_amount = historical_txs.len() as f32;
     let mut fail_tx_amount: f32 = 0.0;
 
@@ -30,11 +34,13 @@ pub async fn send_transactions(
         // Gracefully handle errors so execution doesn't halt on error
         match replay_rpc.send(tx, chain_id, send_as_unsigned).await {
             Ok(_) => (),
-            Err(e) => if exit_on_tx_fail {
-                return Err(e.into());
-            } else {
-                fail_tx_amount += 1.0;
-                println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+            Err(e) => {
+                if exit_on_tx_fail {
+                    return Err(e.into());
+                } else {
+                    fail_tx_amount += 1.0;
+                    println!("!!! \x1b[93mError sending transaction:\x1b[0m {} !!!", e)
+                }
             }
         }
     }

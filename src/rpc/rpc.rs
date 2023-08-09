@@ -1,17 +1,23 @@
-use url::Url;
 use std::thread::sleep;
 use std::time::Instant;
+use url::Url;
 
-use tokio::time::Duration;
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use reqwest::Client;
 use ethers::types::U256;
+use reqwest::Client;
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use serde_json::{
+    json,
+    Value,
+};
+use tokio::time::Duration;
 
-use crate::hex_to_decimal;
-use super::format::format_hex;
 use super::error::*;
+use super::format::format_hex;
 use super::types::*;
+use crate::hex_to_decimal;
 
 #[derive(Debug, Serialize)]
 struct JsonRpcRequest {
@@ -46,11 +52,7 @@ impl RpcConnection {
     }
 
     // Generic fn to send rpc
-    async fn send_request(
-        &self,
-        method: &str,
-        mut params: Value,
-    ) -> Result<String, RequestError> {
+    async fn send_request(&self, method: &str, mut params: Value) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
         let request: Value;
         if params.is_null() {
@@ -84,35 +86,36 @@ impl RpcConnection {
                 // If we cannot get the value here, deserialize as an error and get the response message
                 let err = &response["error"]["message"];
                 return Err(RequestError::RequestFailed(err.to_string()));
-            },
+            }
         };
 
         Ok(response.result.to_string())
     }
 
-    /* 
+    /*
      * JSON-RPC methods
      */
 
     // Gets current block_number.
     pub async fn block_number(&self) -> Result<String, RequestError> {
-        let number = self.send_request("eth_blockNumber", serde_json::Value::Null).await?;
+        let number = self
+            .send_request("eth_blockNumber", serde_json::Value::Null)
+            .await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
     // Gets current chain_id.
     pub async fn chain_id(&self) -> Result<String, RequestError> {
-        let number = self.send_request("eth_chainId", serde_json::Value::Null).await?;
+        let number = self
+            .send_request("eth_chainId", serde_json::Value::Null)
+            .await?;
         let return_number = format_hex(&number);
         Ok(return_number.to_string())
     }
 
     // Gets block info and hashes by block number.
-    pub async fn get_block_by_number(
-        &self,
-        block_number: String,
-    ) -> Result<String, RequestError> {
+    pub async fn get_block_by_number(&self, block_number: String) -> Result<String, RequestError> {
         let params = json!([block_number, true]);
         Ok(self.send_request("eth_getBlockByNumber", params).await?)
     }
@@ -143,12 +146,11 @@ impl RpcConnection {
     }
 
     // Gets transaction by hash (duh).
-    pub async fn get_transaction_by_hash(
-        &self,
-        tx_hash: String,
-    ) -> Result<String, RequestError> {
+    pub async fn get_transaction_by_hash(&self, tx_hash: String) -> Result<String, RequestError> {
         let params = json!([tx_hash]);
-        Ok(self.send_request("eth_getTransactionByHash", params).await?)
+        Ok(self
+            .send_request("eth_getTransactionByHash", params)
+            .await?)
     }
 
     // Sends raw transaction
@@ -166,18 +168,14 @@ impl RpcConnection {
     }
 
     // Sends raw transaction
-    pub async fn call(
-        &self,
-        tx: CallParams,
-        block_number: String,
-    ) -> Result<String, RequestError> {
+    pub async fn call(&self, tx: CallParams, block_number: String) -> Result<String, RequestError> {
         // TODO: maybe value?
         let params = json!([tx, block_number]);
         let result = self.send_request("eth_call", params).await?;
         Ok(result.trim_matches('\"').to_string())
     }
 
-    /* 
+    /*
      * hardhat/anvil specific RPC
      */
 
@@ -199,29 +197,27 @@ impl RpcConnection {
             chainId: Some(chain_id.to_string()),
         };
 
-        let params = serde_json::to_value(vec![tx]).unwrap();  // Convert the TransactionParams to a single-element array
-        Ok(self.send_request("eth_sendUnsignedTransaction", params).await?)
+        let params = serde_json::to_value(vec![tx]).unwrap(); // Convert the TransactionParams to a single-element array
+        Ok(self
+            .send_request("eth_sendUnsignedTransaction", params)
+            .await?)
     }
 
     // Turn automining on/off. If on, mines on every tx.
-    pub async fn evm_set_automine(
-        &self,
-        mode: bool,
-    ) -> Result<String, RequestError> {
+    pub async fn evm_set_automine(&self, mode: bool) -> Result<String, RequestError> {
         let params = json!([mode]);
         Ok(self.send_request("evm_setAutomine", params).await?)
     }
 
     // Mines a block.
     pub async fn evm_mine(&self) -> Result<String, RequestError> {
-        Ok(self.send_request("evm_mine", serde_json::Value::Null).await?)
+        Ok(self
+            .send_request("evm_mine", serde_json::Value::Null)
+            .await?)
     }
 
     // Set the interval at which we mine blocks in ms.
-    pub async fn evm_set_interval_mining(
-        &self,
-        interval: u64,
-    ) -> Result<String, RequestError> {
+    pub async fn evm_set_interval_mining(&self, interval: u64) -> Result<String, RequestError> {
         let params = json!([interval]);
         Ok(self.send_request("evm_setIntervalMining", params).await?)
     }
@@ -232,27 +228,31 @@ impl RpcConnection {
         timestamp: u64,
     ) -> Result<String, RequestError> {
         let params = json!([timestamp]);
-        Ok(self.send_request("evm_setNextBlockTimestamp", params).await?)
-    }
-    
-    // Gets hardhat mining mode. We use this to check if our node is HH or anvil.
-    pub async fn hardhat_get_automine(&self) -> Result<String, RequestError> {
-        Ok(self.send_request("hardhat_getAutomine", serde_json::Value::Null).await?)
+        Ok(self
+            .send_request("evm_setNextBlockTimestamp", params)
+            .await?)
     }
 
-    /* 
+    // Gets hardhat mining mode. We use this to check if our node is HH or anvil.
+    pub async fn hardhat_get_automine(&self) -> Result<String, RequestError> {
+        Ok(self
+            .send_request("hardhat_getAutomine", serde_json::Value::Null)
+            .await?)
+    }
+
+    /*
      * Subscriptions
      */
 
     // Listen for new blocks, return latest blocknumber on new block.
-    pub async fn listen_for_blocks(
-        &self,
-        time: u64,
-    ) -> Result<String, RequestError> {
+    pub async fn listen_for_blocks(&self, time: u64) -> Result<String, RequestError> {
         // theres a million ways to do it than this but i couldnt be bothered
         let blocknumber = self.block_number().await?;
         let mut new_blocknumber = blocknumber.clone();
-        println!("Listening for new blocks from block {}...", hex_to_decimal(&blocknumber).unwrap());
+        println!(
+            "Listening for new blocks from block {}...",
+            hex_to_decimal(&blocknumber).unwrap()
+        );
 
         // Start timer for the *heartbeat*
         let mut start_time = Instant::now();
@@ -260,7 +260,7 @@ impl RpcConnection {
         while blocknumber == new_blocknumber {
             // sleep for set duration
             sleep(Duration::from_millis(time));
-            
+
             // Add this as a *heartbeat* so users are less confused if nothing is happening
             let elapsed_time = start_time.elapsed();
 
@@ -271,14 +271,13 @@ impl RpcConnection {
                 start_time = Instant::now();
             }
 
-
             new_blocknumber = self.block_number().await?
         }
 
         Ok(new_blocknumber)
     }
 
-    /* 
+    /*
      * Helper functions
      */
 
@@ -290,5 +289,4 @@ impl RpcConnection {
             Err(_) => return false,
         };
     }
-
 }

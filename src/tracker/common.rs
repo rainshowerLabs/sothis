@@ -1,51 +1,54 @@
 use crate::hex_to_decimal;
-use crate::tracker::types::SerializeStorage;
 use crate::tracker::time::get_latest_unix_timestamp;
+use crate::tracker::types::SerializeStorage;
 
 use regex::Regex;
 use std::fs;
 
 pub fn set_filename_and_serialize<T: SerializeStorage>(
-	path: String,
-	filename: String,
-	storage: T,
-	contract_address: String,
-	middle_label: &str,
-	middle_value: String,
-	output_as_decimal: bool,
+    path: String,
+    filename: String,
+    storage: T,
+    contract_address: String,
+    middle_label: &str,
+    middle_value: String,
+    output_as_decimal: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-	let mut json: String;
+    let mut json: String;
 
-	// Set the filename to `address{contract_address}-{middle_label}-{storage_slot}-timestamp-{unix_timestamp} if its the default one
-	// We also check if we should serialize it as csv
-	let filename = match filename.as_str() {
-		"" => {
-			let timestamp = get_latest_unix_timestamp();
-			println!("No filename specified, using default and formatting as JSON");
-			json = storage.serialize_json()?;
-			format!("address-{}-{}-{}-timestamp-{}.json", contract_address, middle_label, middle_value, timestamp)
-		},
-		filename if filename.contains(".csv") => {
-			println!("Formatting as CSV");
-			json = storage.serialize_csv();
-			filename.to_string()
-		},
-		_ => {
-			json = storage.serialize_json()?;
-			filename
-		},
-	};
+    // Set the filename to `address{contract_address}-{middle_label}-{storage_slot}-timestamp-{unix_timestamp} if its the default one
+    // We also check if we should serialize it as csv
+    let filename = match filename.as_str() {
+        "" => {
+            let timestamp = get_latest_unix_timestamp();
+            println!("No filename specified, using default and formatting as JSON");
+            json = storage.serialize_json()?;
+            format!(
+                "address-{}-{}-{}-timestamp-{}.json",
+                contract_address, middle_label, middle_value, timestamp
+            )
+        }
+        filename if filename.contains(".csv") => {
+            println!("Formatting as CSV");
+            json = storage.serialize_csv();
+            filename.to_string()
+        }
+        _ => {
+            json = storage.serialize_json()?;
+            filename
+        }
+    };
 
-	let path = format!("{}/{}", path, filename);
-	println!("\nWriting to file: {}", path);
+    let path = format!("{}/{}", path, filename);
+    println!("\nWriting to file: {}", path);
 
-	if output_as_decimal {
-		json = output_to_dec(json);
-	}
+    if output_as_decimal {
+        json = output_to_dec(json);
+    }
 
-	fs::write(path, json)?;
-	
-	Ok(())
+    fs::write(path, json)?;
+
+    Ok(())
 }
 
 fn is_valid_eth_address(hex_str: &str) -> bool {

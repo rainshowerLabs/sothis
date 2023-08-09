@@ -1,14 +1,17 @@
 use ethers::types::transaction::eip2930::AccessList;
-use serde::{Deserialize, Serialize,};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 use serde_json::Value;
 
-use ethers::utils::hex;
 use ethers::types::{
-    H160,
     Bytes,
     Eip1559TransactionRequest,
     TransactionRequest,
+    H160,
 };
+use ethers::utils::hex;
 
 use std::str::FromStr;
 
@@ -69,10 +72,7 @@ pub struct Transaction {
 }
 
 impl Transaction {
-    pub fn rlp_serialize_tx(
-        &self,
-        chain_id: u64,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn rlp_serialize_tx(&self, chain_id: u64) -> Result<String, Box<dyn std::error::Error>> {
         let encoded;
         // if access list exists we need the typed transaction to be an eip1559 one
         if self.maxFeePerGas.is_some() {
@@ -85,12 +85,13 @@ impl Transaction {
         Ok(encoded)
     }
 
-    fn rlp_serialize_eip1559(
-        &self,
-        chain_id: u64,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    fn rlp_serialize_eip1559(&self, chain_id: u64) -> Result<String, Box<dyn std::error::Error>> {
         let to = match &self.to {
-            Some(_) => Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
+            Some(_) => {
+                Some(ethers::types::NameOrAddress::Address(H160::from_str(
+                    &self.to.clone().unwrap(),
+                )?))
+            }
             None => None,
         };
 
@@ -99,10 +100,14 @@ impl Transaction {
             to: to,
             gas: Some(U256::from_str(&self.gas)?),
             value: Some(U256::from_str(&self.value)?),
-            data: Some(Bytes::from(hex::decode(&self.input.trim_start_matches("0x"))?)), // ?????
+            data: Some(Bytes::from(hex::decode(
+                &self.input.trim_start_matches("0x"),
+            )?)), // ?????
             nonce: Some(U256::from_str(&self.nonce)?),
             access_list: AccessList::default(), // TODO: make this not-default later. its optional so who cares for now
-            max_priority_fee_per_gas: Some(U256::from_str(&self.maxPriorityFeePerGas.clone().unwrap())?),
+            max_priority_fee_per_gas: Some(U256::from_str(
+                &self.maxPriorityFeePerGas.clone().unwrap(),
+            )?),
             max_fee_per_gas: Some(U256::from_str(&self.maxFeePerGas.clone().unwrap())?),
             chain_id: Some(chain_id.into()),
         };
@@ -127,13 +132,13 @@ impl Transaction {
         Ok(hex::encode(typed_tx.rlp_signed(&sig)))
     }
 
-    fn rlp_serialize_legacy(
-        &self,
-        chain_id: u64,
-    ) -> Result<String, Box<dyn std::error::Error>> {
-
+    fn rlp_serialize_legacy(&self, chain_id: u64) -> Result<String, Box<dyn std::error::Error>> {
         let to = match &self.to {
-            Some(_) => Some(ethers::types::NameOrAddress::Address(H160::from_str(&self.to.clone().unwrap())?)),
+            Some(_) => {
+                Some(ethers::types::NameOrAddress::Address(H160::from_str(
+                    &self.to.clone().unwrap(),
+                )?))
+            }
             None => None,
         };
 
@@ -143,7 +148,9 @@ impl Transaction {
             gas: Some(U256::from_str(&self.gas)?),
             gas_price: Some(U256::from_str(&self.gasPrice)?),
             value: Some(U256::from_str(&self.value)?),
-            data: Some(Bytes::from(hex::decode(&self.input.trim_start_matches("0x"))?)),
+            data: Some(Bytes::from(hex::decode(
+                &self.input.trim_start_matches("0x"),
+            )?)),
             nonce: Some(U256::from_str(&self.nonce)?),
             chain_id: Some(chain_id.into()),
         };
@@ -173,7 +180,6 @@ impl Transaction {
     }
 }
 
-
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(non_snake_case)]
 pub struct TransactionParams {
@@ -193,4 +199,3 @@ pub struct CallParams {
     pub to: String,
     pub data: String,
 }
-

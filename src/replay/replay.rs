@@ -2,9 +2,9 @@ use std::thread::sleep;
 use tokio::time::Duration;
 
 use crate::replay::send_transaction::send_transactions;
-use crate::RpcConnection;
 use crate::rpc::format::*;
 use crate::rpc::types::*;
+use crate::RpcConnection;
 
 // To replay historic blocks we:
 // 0) Make sure that the chainids match
@@ -41,8 +41,10 @@ pub async fn replay_historic_blocks(
     // set automine to false
     replay_rpc.evm_set_automine(false).await?;
     // set insanely high interval for the blocks
-    replay_rpc.evm_set_interval_mining(std::u32::MAX.into()).await?;
-    
+    replay_rpc
+        .evm_set_interval_mining(std::u32::MAX.into())
+        .await?;
+
     loop {
         // we write a bit of illegible code
         let hex_block = decimal_to_hex(replay_block + 1);
@@ -61,16 +63,20 @@ pub async fn replay_historic_blocks(
             entropy_threshold,
             exit_on_tx_fail,
             send_as_raw,
-        ).await?;
+        )
+        .await?;
 
         // set next block timestamp
-        replay_rpc.evm_set_next_block_timestamp(
-            hex_to_decimal(&historical_block.timestamp)?
-        ).await?;
+        replay_rpc
+            .evm_set_next_block_timestamp(hex_to_decimal(&historical_block.timestamp)?)
+            .await?;
 
         // mine the block
         replay_rpc.evm_mine().await?;
-        println!("Successfully replayed block {}", hex_to_decimal(&hex_block)?);
+        println!(
+            "Successfully replayed block {}",
+            hex_to_decimal(&hex_block)?
+        );
 
         replay_block = hex_to_decimal(&replay_rpc.block_number().await?)?;
 
@@ -86,7 +92,7 @@ pub async fn replay_historic_blocks(
 
 // To replay live blocks we:
 // 0) Assume that we are lagging behind the head.
-// 1) Catch up to the head block by using `replay_historic_blocks`. 
+// 1) Catch up to the head block by using `replay_historic_blocks`.
 // 2) Once we caught up, listen for new blocks.
 // 3) Repeat from 2.
 #[allow(dead_code, unused_variables)]
@@ -98,7 +104,7 @@ pub async fn replay_live(
     entropy_threshold: f32,
     exit_on_tx_fail: bool,
     send_as_raw: bool,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let latest_block = source_rpc.listen_for_blocks(block_listen_time).await?;
         if latest_block != replay_rpc.block_number().await? {
@@ -111,8 +117,8 @@ pub async fn replay_live(
                 entropy_threshold,
                 exit_on_tx_fail,
                 send_as_raw,
-
-                ).await?;
+            )
+            .await?;
         }
     }
 }

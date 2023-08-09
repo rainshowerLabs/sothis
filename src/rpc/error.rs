@@ -1,4 +1,7 @@
-use std::{fmt, num::ParseIntError};
+use std::{
+    fmt,
+    num::ParseIntError,
+};
 
 #[derive(Debug)]
 pub enum RequestError {
@@ -20,7 +23,7 @@ impl fmt::Display for RequestError {
             }
             RequestError::UnknownError(err) => {
                 write!(f, "Unknown error: {}", err)
-            },
+            }
         }
     }
 }

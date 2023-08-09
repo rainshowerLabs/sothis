@@ -1,5 +1,7 @@
-use clap::{Command, Arg};
-
+use clap::{
+    Arg,
+    Command,
+};
 
 // This is not the recommended way to set clap args but it works and its too late to change it now
 pub fn create_match() -> clap::Command {
@@ -107,5 +109,5 @@ pub fn create_match() -> clap::Command {
             .default_value("")
             .help("Name of the file."));
 
-	return matches;
+    return matches;
 }
