@@ -1,5 +1,7 @@
 ![f3f86624-a5b0-4c60-a44b-4dc1a2ce25a0](https://github.com/rainshowerLabs/sothis/assets/55022497/a5e5dda2-875c-4d88-88bd-88d5f945854d)
 
+Join the discussion on our [discord](https://discord.gg/92TfQWdjEh), [telegram](https://t.me/rainshower), or [matrix!](https://matrix.to/#/%23rainshower:matrix.org)
+
 # `sothis`
 
 Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node. 
