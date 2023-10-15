@@ -47,7 +47,7 @@ Options:
       --no_setup [<no_setup>...]
           Start replaying immediately.
       --decimal [<decimal>...]
-          Start replaying immediately.
+          Return decimal values, not hex.
   -c, --contract_address <contract_address>...
           Address of the contract we're tracking storage.
   -l, --storage_slot <storage_slot>...
