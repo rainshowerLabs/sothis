@@ -64,7 +64,7 @@ pub fn create_match() -> clap::Command {
         .arg(Arg::new("decimal")
             .long("decimal")
             .num_args(0..)
-            .help("Start replaying immediately."))
+            .help("Return decimal values, not hex."))
         .arg(Arg::new("contract_address")
             .long("contract_address")
             .short('c')
