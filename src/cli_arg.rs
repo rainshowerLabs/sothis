@@ -109,5 +109,5 @@ pub fn create_match() -> clap::Command {
             .default_value("")
             .help("Name of the file."));
 
-    return matches;
+    matches
 }

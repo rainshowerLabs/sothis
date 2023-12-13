@@ -141,7 +141,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .get_one::<String>("terminal_block")
                 .map(|x| x.parse().expect("Invalid terminal block"));
 
-            if terminal_block == None {
+            if terminal_block.is_none() {
                 println!("No terminal block set, tracking indefinitely.");
             }
 

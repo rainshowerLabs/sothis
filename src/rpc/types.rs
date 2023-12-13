@@ -97,11 +97,11 @@ impl Transaction {
 
         let transaction = Eip1559TransactionRequest {
             from: Some(H160::from_str(&self.from).unwrap()),
-            to: to,
+            to,
             gas: Some(U256::from_str(&self.gas)?),
             value: Some(U256::from_str(&self.value)?),
             data: Some(Bytes::from(hex::decode(
-                &self.input.trim_start_matches("0x"),
+                self.input.trim_start_matches("0x"),
             )?)), // ?????
             nonce: Some(U256::from_str(&self.nonce)?),
             access_list: AccessList::default(), // TODO: make this not-default later. its optional so who cares for now
@@ -144,12 +144,12 @@ impl Transaction {
 
         let transaction = TransactionRequest {
             from: Some(H160::from_str(&self.from).unwrap()),
-            to: to,
+            to,
             gas: Some(U256::from_str(&self.gas)?),
             gas_price: Some(U256::from_str(&self.gasPrice)?),
             value: Some(U256::from_str(&self.value)?),
             data: Some(Bytes::from(hex::decode(
-                &self.input.trim_start_matches("0x"),
+                self.input.trim_start_matches("0x"),
             )?)),
             nonce: Some(U256::from_str(&self.nonce)?),
             chain_id: Some(chain_id.into()),

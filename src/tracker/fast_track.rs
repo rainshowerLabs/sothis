@@ -46,7 +46,7 @@ pub async fn fast_track_state(
 
     let mut storage = StateChangeList {
         address: contract_address.clone(),
-        storage_slot: storage_slot,
+        storage_slot,
         state_changes: Vec::new(),
     };
 
@@ -76,7 +76,7 @@ pub async fn fast_track_state(
         let latest_slot = source_rpc
             .get_storage_at_block(
                 contract_address.clone(),
-                storage_slot.clone(),
+                storage_slot,
                 decimal_to_hex(current_block),
             )
             .await?;

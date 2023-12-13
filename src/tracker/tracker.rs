@@ -32,7 +32,7 @@ pub async fn track_state(
 
     let mut storage = StateChangeList {
         address: contract_address.clone(),
-        storage_slot: storage_slot,
+        storage_slot,
         state_changes: Vec::new(),
     };
 
@@ -49,7 +49,7 @@ pub async fn track_state(
 
         let block_number_u256: U256 = block_number.parse()?;
         let latest_slot = source_rpc
-            .get_storage_at(contract_address.clone(), storage_slot.clone())
+            .get_storage_at(contract_address.clone(), storage_slot)
             .await?;
 
         let slot = StateChange {
