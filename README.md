@@ -4,7 +4,7 @@ Join the discussion on our [discord](https://discord.gg/92TfQWdjEh), [telegram](
 
 # `sothis`
 
-Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node. 
+Sothis is a tool for replaying historical state on a local ***anvil/hardhat*** testnet node.
 
 **For detailed instructions, read the [wiki.](https://github.com/rainshowerLabs/sothis/wiki)**
 
@@ -14,7 +14,7 @@ Join the [Rainshower Labs discord server](https://discord.gg/Cs3h397gkz) to disc
 
 ## Using sothis as a crate
 
-Sothis can be used as a crate in other rust projects. All tracking modes, as well as the lightweight wrapper around JSON-RPC calls can be used. For more on using sothis as a crate, check out the [wiki.](https://github.com/rainshowerLabs/sothis/wiki)   
+Sothis can be used as a crate in other rust projects. All tracking modes, as well as the lightweight wrapper around JSON-RPC calls can be used. For more on using sothis as a crate, check out the [wiki.](https://github.com/rainshowerLabs/sothis/wiki)
 
 We are targeting **1.68.2 as the MSRV**(minimum supported rust version).
 
@@ -33,7 +33,7 @@ Options:
   -m, --mode <mode>...
           Choose between live, historic, track, fast_track, or call_track [default: historic]
   -b, --terminal_block <terminal_block>...
-          Block we're replaying until
+          Last block sothis will look at.
       --exit_on_tx_fail [<exit_on_tx_fail>...]
           Exit the program if a transaction fails
   -t, --block_listen_time <block_listen_time>...
@@ -57,7 +57,7 @@ Options:
   -o, --origin_block <origin_block>...
           First block sothis will look at.
   -q, --query_interval <query_interval>...
-          First block sothis will look at.
+          Interval spacing of blocks to query.
   -p, --path <path>...
           Path to file we're writing to [default: .]
   -f, --filename <filename>...
@@ -69,7 +69,7 @@ Options:
 
 ```
 
-Sothis currently has 5 modes. Live, historic, track, fast track, and call track.   
+Sothis currently has 5 modes. Live, historic, track, fast track, and call track.
 
 ### Historic
 
@@ -106,7 +106,7 @@ sothis --source_rpc {ARCHIVE_NODE} --replay_rpc http://localhost:8545 -m live
 
 ### Track
 
-The tracking mode is used to track the change in value of a storage slot for a contract, that needs to be updated live. It can be used on a live production network, as well as in conjuntion with sothis (keep in mind that you can use the `--block_listen_time` so tracking doesn't lag behind!) . If you are testing on a local network, you can launch another instance of sothis to track the change of a slot on a replay node.   
+The tracking mode is used to track the change in value of a storage slot for a contract, that needs to be updated live. It can be used on a live production network, as well as in conjuntion with sothis (keep in mind that you can use the `--block_listen_time` so tracking doesn't lag behind!) . If you are testing on a local network, you can launch another instance of sothis to track the change of a slot on a replay node.
 
 The result is saved to a JSON file that looks like this:
 ```json
@@ -184,7 +184,7 @@ Sothis is a rust crate. You can install it with cargo:
 
 ###  Why is sothis so slow?
 
-Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. It's recommended to use your own local node.       
+Sothis uses a lot of JSON-RPC calls. This may cause your RPC provider to throttle you. It's recommended to use your own local node.
 If using `anvil` make sure you add the `--cups {REALL_HIGH_VALUE}` arg so anvil doesn't throttle itself.
 
 ### I have a problem with sothis. Can devs do something?
