@@ -5,7 +5,9 @@ use clap::{
 
 // This is not the recommended way to set clap args but it works and its too late to change it now
 pub fn create_match() -> clap::Command {
-    let matches = Command::new("sothis")
+    
+
+    Command::new("sothis")
         .version("0.5.0")
         .author("makemake <vukasin@gostovic.me>")
         .about("Tool for replaying historical transactions. Designed to be used with anvil or hardhat.")
@@ -107,7 +109,5 @@ pub fn create_match() -> clap::Command {
             .short('f')
             .num_args(1..)
             .default_value("")
-            .help("Name of the file."));
-
-    matches
+            .help("Name of the file."))
 }

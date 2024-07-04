@@ -54,7 +54,7 @@ impl RpcConnection {
     // Generic fn to send rpc
     async fn send_request(&self, method: &str, mut params: Value) -> Result<String, RequestError> {
         // We do this because eth rpc cries if param is empty
-        
+
         if params.is_null() {
             params = json!([]);
         }
@@ -148,9 +148,7 @@ impl RpcConnection {
     // Gets transaction by hash (duh).
     pub async fn get_transaction_by_hash(&self, tx_hash: String) -> Result<String, RequestError> {
         let params = json!([tx_hash]);
-        self
-            .send_request("eth_getTransactionByHash", params)
-            .await
+        self.send_request("eth_getTransactionByHash", params).await
     }
 
     // Sends raw transaction
@@ -198,8 +196,7 @@ impl RpcConnection {
         };
 
         let params = serde_json::to_value(vec![tx]).unwrap(); // Convert the TransactionParams to a single-element array
-        self
-            .send_request("eth_sendUnsignedTransaction", params)
+        self.send_request("eth_sendUnsignedTransaction", params)
             .await
     }
 
@@ -211,9 +208,7 @@ impl RpcConnection {
 
     // Mines a block.
     pub async fn evm_mine(&self) -> Result<String, RequestError> {
-        self
-            .send_request("evm_mine", serde_json::Value::Null)
-            .await
+        self.send_request("evm_mine", serde_json::Value::Null).await
     }
 
     // Set the interval at which we mine blocks in ms.
@@ -228,15 +223,12 @@ impl RpcConnection {
         timestamp: u64,
     ) -> Result<String, RequestError> {
         let params = json!([timestamp]);
-        self
-            .send_request("evm_setNextBlockTimestamp", params)
-            .await
+        self.send_request("evm_setNextBlockTimestamp", params).await
     }
 
     // Gets hardhat mining mode. We use this to check if our node is HH or anvil.
     pub async fn hardhat_get_automine(&self) -> Result<String, RequestError> {
-        self
-            .send_request("hardhat_getAutomine", serde_json::Value::Null)
+        self.send_request("hardhat_getAutomine", serde_json::Value::Null)
             .await
     }
 
@@ -284,9 +276,6 @@ impl RpcConnection {
     // This just kinda abstracts the check of if its hardhat.
     pub async fn is_hardhat(&self) -> bool {
         // call hardhat_get_automine and if we get a response, assume we are on hardhat
-        match self.hardhat_get_automine().await {
-            Ok(_) => true,
-            Err(_) => false,
-        }
+        self.hardhat_get_automine().await.is_ok()
     }
 }

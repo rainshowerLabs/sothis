@@ -12,12 +12,18 @@ keywords = ["cli", "ethereum", "foundry", "reth", "revm"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-clap = "4.3.0"
-ctrlc = "3.4.0"
-ethers = {version = "2.0.7", features = ["legacy"]}
-regex = "1.9.1"
-reqwest = { version = "0.11.18", features = ["blocking", "json"] }
-serde = { version = "1.0.163", features = ["derive"] }
-serde_json = "1.0.96"
-tokio = { version = "1.28.1", features = ["full"] }
-url = "2.4.0"
+clap = "4.5.8"
+ctrlc = "3.4.4"
+ethers = {version = "2.0.14", features = ["legacy"]}
+regex = "1.10.5"
+reqwest = { version = "0.12.5", default-features=false, features = ["blocking", "json", "http2", "rustls-tls"] }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.120"
+tokio = { version = "1.38.0", features = ["full"] }
+url = "2.5.2"
+
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
