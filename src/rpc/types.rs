@@ -24,7 +24,7 @@ use crate::hex_to_decimal;
 #[derive(Debug, Deserialize, Serialize)]
 #[allow(dead_code, non_snake_case)]
 pub struct BlockResult {
-    difficulty: String,
+    difficulty: Option<String>,
     extraData: String,
     gasLimit: String,
     gasUsed: String,
@@ -40,7 +40,7 @@ pub struct BlockResult {
     size: String,
     stateRoot: String,
     pub timestamp: String,
-    totalDifficulty: String,
+    totalDifficulty: Option<String>,
     pub transactions: Vec<Transaction>,
     transactionsRoot: String,
     uncles: Vec<String>,
